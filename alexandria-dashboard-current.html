@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Alexandria Emergency Alert Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:#001f3f;color:#fff;font-family:Arial, sans-serif;min-height:100vh;padding:20px}
+    .container{max-width:1200px;margin:0 auto}
+    .header{margin-bottom:40px}
+    .header h1{font-size:2.5rem;margin-bottom:15px;font-weight:700}
+    .header p{font-size:1rem;line-height:1.6;opacity:.9}
+    .dashboard{display:grid;grid-template-columns:2fr 1fr;gap:30px}
+    .alerts-section h2,.urgency-section h2{font-size:1.8rem;margin-bottom:25px;font-weight:600}
+    .alert-item{background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border-radius:12px;padding:20px;margin-bottom:20px;border-left:5px solid;position:relative;transition:transform .2s ease, box-shadow .2s ease;display:flex;flex-direction:column;word-wrap:break-word;overflow-wrap:break-word}
+    .alert-item:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(0,0,0,.2)}
+    .alert-item.urgent{border-left-color:#dc3545;background:rgba(220,53,69,.1)}
+    .alert-item.moderate{border-left-color:#fd7e14;background:rgba(253,126,20,.1)}
+    .alert-item.minor{border-left-color:#ffc107;background:rgba(255,193,7,.1)}
+    .alert-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:15px}
+    .urgency-badge{padding:6px 14px;border-radius:20px;font-size:.8rem;font-weight:600;text-transform:capitalize}
+    .urgency-badge.urgent{background:#dc3545}
+    .urgency-badge.moderate{background:#fd7e14}
+    .urgency-badge.minor{background:#ffc107;color:#333}
+    .time-location{font-size:.9rem;opacity:.8;margin-bottom:8px}
+    .alert-title{font-size:1.1rem;font-weight:600;line-height:1.4;margin-bottom:8px}
+    .alert-summary{font-size:.95rem;opacity:.95;margin-bottom:10px}
+    .source-chip{font-size:.8rem;opacity:.9;margin-top:6px;display:inline-flex;gap:8px;align-items:center}
+    .source-chip a{color:#ffd76a;text-decoration:none}
+    .relevance-label{font-size:.8rem;color:#ffc107;margin-bottom:8px}
+    .relevance-section{margin-top:10px;display:flex;align-items:center;justify-content:space-between}
+    .relevance-buttons{display:flex;gap:10px}
+    .relevance-btn{width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;transition:all .2s ease}
+    .relevance-btn:hover{transform:scale(1.1)}
+    .relevance-btn.active{transform:scale(1.1);opacity:1}
+    .relevance-btn.thumbs-up{background:rgba(40,167,69,.2)}
+    .relevance-btn.thumbs-down{background:rgba(220,53,69,.2)}
+    .relevance-btn.thumbs-up.active{background:#28a745;color:#fff}
+    .relevance-btn.thumbs-down.active{background:#dc3545;color:#fff}
+    .relevance-btn:disabled{opacity:.5;cursor:not-allowed}
+    .sidebar{display:flex;flex-direction:column;gap:30px}
+    .urgency-panel{background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border-radius:12px;padding:25px}
+    .urgency-indicator{display:flex;flex-direction:column;gap:12px;margin-bottom:30px}
+    .urgency-level{padding:12px 20px;border-radius:8px;text-align:center;font-weight:600}
+    .urgency-level.urgent{background:#dc3545}
+    .urgency-level.moderate{background:#fd7e14}
+    .provenance h3{margin-bottom:15px;font-size:1.2rem}
+    .source-list{list-style:none}
+    .source-list li{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:.95rem}
+    .source-list li:last-child{border-bottom:none}
+    .loading{text-align:center;padding:40px;opacity:.7}
+    .no-alerts{text-align:center;padding:40px;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border-radius:12px;opacity:.8}
+    .status-indicator{display:inline-block;width:12px;height:12px;background:#28a745;border-radius:50%;margin-right:8px;animation:pulse 2s infinite}
+    @keyframes pulse{0%{opacity:1}50%{opacity:.5}100%{opacity:1}}
+    .last-updated{text-align:right;font-size:.8rem;opacity:.7;margin-top:20px}
+    @media (max-width:768px){.dashboard{grid-template-columns:1fr;gap:20px}.header h1{font-size:2rem}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Alexandria Emergency Alert Dashboard</h1>
+      <p>This project aims to develop a real-time emergency alert system that supports the decision-making processes of Alexandria's emergency management professionals. The platform integrates live data from various open-source intelligence (OSINT) sources such as Reddit, Twitter API, and satellite/news feeds to detect potential local crises including floods, riots, fires, and other hazards.</p>
+    </div>
+
+    <div class="dashboard">
+      <div class="alerts-section">
+        <h2><span class="status-indicator"></span>Alerts</h2>
+        <div id="alerts-container"><div class="loading">Loading emergency alerts...</div></div>
+        <div class="last-updated" id="last-updated"></div>
+      </div>
+
+      <div class="sidebar">
+        <div class="urgency-panel">
+          <h2>Urgency</h2>
+          <div class="urgency-indicator">
+            <div class="urgency-level urgent">Urgent</div>
+            <div class="urgency-level moderate">Moderate</div>
+          </div>
+
+          <div class="provenance">
+            <h3>Provenance</h3>
+            <ul class="source-list" id="source-list">
+              <li><i class="fas fa-bolt"></i> NWS Weather Alerts</li>
+              <li><i class="fas fa-mountain-sun"></i> USGS Earthquakes</li>
+              <li><i class="fas fa-water"></i> USGS NWIS (Rivers)</li>
+              <li><i class="fas fa-satellite"></i> NASA FIRMS / EONET (Fires)</li>
+              <li><i class="fas fa-train-subway"></i> WMATA Incidents</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Provide a stub, then (optionally) load local secrets -->
+  <script>window.APP_SECRETS = window.APP_SECRETS || {};</script>
+  <script src="config.local.js"></script>
+
+  <script>
+    // ---------------- CONFIG ----------------
+    const TEST_MODE = true; // Trial mode -> global EQ + global wildfires (set true if you want)
+    const SECRETS = window.APP_SECRETS || {};
+    const CONFIG = {
+      center: { lat: 38.8048, lon: -77.0469 }, // Alexandria City Hall
+      radiusKm: TEST_MODE ? 500 : 10,
+      bbox: { minLon: -77.15, minLat: 38.75, maxLon: -77.00, maxLat: 38.87 }, // local FIRMS (prod)
+      nwisSites: ["01652500","01646500"],
+      refreshMs: 60_000,
+      FIRMS_API_KEY: SECRETS.FIRMS_API_KEY || "",   // <- pulled from config.local.js
+      WMATA_API_KEY: SECRETS.WMATA_API_KEY || ""    // <- pulled from config.local.js
+    };
+
+    // --------------- UTILITIES ---------------
+    function handleRelevance(button, isUpvote){
+      const container = button.parentElement;
+      const up = container.querySelector(".thumbs-up");
+      const down = container.querySelector(".thumbs-down");
+      if (isUpvote){ up.classList.add("active"); up.disabled = true; down.classList.remove("active"); down.disabled = true; }
+      else { down.classList.add("active"); down.disabled = true; up.classList.remove("active"); up.disabled = true; }
+    }
+    const isoNowMinus = ms => new Date(Date.now()-ms).toISOString();
+    function getTimeAgo(date){
+      const d = new Date(date); const diff = Date.now() - d.getTime();
+      const m = Math.floor(diff/60000); if (m<60) return `${m}m ago`;
+      const h = Math.floor(m/60); if (h<24) return `${h}h ago`;
+      return `${Math.floor(h/24)}d ago`;
+    }
+    function mapUrgencyByWords(sev){
+      if (!sev) return "moderate";
+      const s = String(sev).toLowerCase();
+      if (s.includes("extreme")||s.includes("severe")||s.includes("warning")||s.includes("immediate")) return "urgent";
+      if (s.includes("watch")||s.includes("moderate")||s.includes("advisory")||s.includes("expected")) return "moderate";
+      return "minor";
+    }
+    function htmlEscape(str=""){ return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    // --------------- FETCHERS ----------------
+
+    // NWS Alerts (VA-wide in test; point-local in prod)
+    async function fetchNWSAlerts(lat, lon){
+      const url = TEST_MODE
+        ? `https://api.weather.gov/alerts/active?area=VA`
+        : `https://api.weather.gov/alerts/active?point=${lat},${lon}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const feats = data.features || [];
+      return feats.map(f => {
+        const p = f.properties || {};
+        return {
+          title: p.headline || p.event || "NWS Alert",
+          summary: p.description || "",
+          event: p.event || "Alert",
+          severity: p.severity || "",
+          urgency: p.urgency || "",
+          area: p.areaDesc || "Alexandria area",
+          effective: p.effective || p.onset || p.sent || isoNowMinus(0),
+          expires: p.expires || p.ends || "",
+          source: "NWS",
+          url: p?.id || ""
+        };
+      });
+    }
+
+    // USGS Earthquakes (global in TEST_MODE; local otherwise)
+    async function fetchUSGSEarthquakes(lat, lon, radiusKm){
+      let url;
+      if (TEST_MODE){
+        url = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&orderby=time&starttime=${new Date(Date.now()-48*3600*1000).toISOString()}&minmagnitude=4.5`;
+      } else {
+        url = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&latitude=${lat}&longitude=${lon}&maxradiuskm=${radiusKm}&orderby=time&starttime=${new Date(Date.now()-48*3600*1000).toISOString()}`;
+      }
+      const res = await fetch(url);
+      const data = await res.json();
+      const feats = data.features || [];
+      return feats.slice(0,30).map(f => {
+        const p = f.properties || {};
+        const mag = p.mag != null ? `M${p.mag}` : "M?";
+        return {
+          title: `${mag} Earthquake — ${p.place || "Global"}`,
+          summary: `Magnitude ${p.mag ?? "?"}.`,
+          event: "Earthquake",
+          severity: (p.mag >= 6 ? "Severe" : p.mag >= 4.5 ? "Moderate" : "Minor"),
+          urgency: "Immediate",
+          area: p.place || "Global",
+          effective: p.time ? new Date(p.time).toISOString() : isoNowMinus(0),
+          expires: "",
+          source: "USGS (Earthquakes)",
+          url: p.url || ""
+        };
+      });
+    }
+
+    // FIRMS (single bbox, used for production/local view)
+    async function fetchFIRMS(bbox, days=7){
+      if (!CONFIG.FIRMS_API_KEY) return [];
+      const key = CONFIG.FIRMS_API_KEY;
+      const {minLon, minLat, maxLon, maxLat} = bbox;
+      const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${key}/VIIRS_SNPP_NRT/${minLon},${minLat},${maxLon},${maxLat}/${days}`;
+      const res = await fetch(url);
+      if (!res.ok) return [];
+      const csv = await res.text();
+      const lines = csv.trim().split(/\r?\n/); if (lines.length<2) return [];
+      const header = lines[0].split(",");
+      const rows = lines.slice(1).map(line=>{
+        const cols=line.split(","); const obj={}; header.forEach((h,i)=>obj[h.trim()]=(cols[i]||"").trim()); return obj;
+      });
+      return rows.map(r=>{
+        const conf = r.confidence || r.confidence_text || "";
+        const when = r.acq_date && r.acq_time
+          ? new Date(`${r.acq_date}T${(r.acq_time+"").padStart(4,"0").slice(0,2)}:${(r.acq_time+"").padStart(4,"0").slice(2)}:00Z`).toISOString()
+          : isoNowMinus(0);
+        return {
+          title: `Thermal Anomaly (VIIRS) — ${r.bright_ti4 ? `BTi4 ${r.bright_ti4}` : "Possible Fire"}`,
+          summary: `Lat ${r.latitude}, Lon ${r.longitude} • Confidence ${conf || "n/a"}`,
+          event: "Fire/Heat Anomaly",
+          severity: (String(conf).toLowerCase().includes("high") ? "Severe" : "Moderate"),
+          urgency: "Immediate",
+          area: `~ ${(+r.latitude).toFixed(4)}, ${(+r.longitude).toFixed(4)}`,
+          effective: when,
+          expires: "",
+          source: "NASA FIRMS",
+          url: "https://firms.modaps.eosdis.nasa.gov/"
+        };
+      });
+    }
+
+    // FIRMS Global (split world into 4 quads) — only if key is present
+    async function fetchFIRMSGlobal(days=3){
+      if (!CONFIG.FIRMS_API_KEY) return [];
+      const quads = [
+        {minLon:-180,minLat:-90,maxLon:0,maxLat:0},
+        {minLon:0,minLat:-90,maxLon:180,maxLat:0},
+        {minLon:-180,minLat:0,maxLon:0,maxLat:90},
+        {minLon:0,minLat:0,maxLon:180,maxLat:90}
+      ];
+      const results = await Promise.allSettled(quads.map(q=>fetchFIRMS(q, days)));
+      let items = results.flatMap(r=>r.status==='fulfilled'?r.value:[]);
+      const seen=new Set();
+      items = items.filter(a=>{
+        const k = `${a.area}|${a.effective}`;
+        if (seen.has(k)) return false;
+        seen.add(k); return true;
+      });
+      return items.slice(0,60);
+    }
+
+    // NASA EONET Wildfires (fallback if no FIRMS key)
+    async function fetchEONETWildfires(){
+      const url = `https://eonet.gsfc.nasa.gov/api/v3/events?status=open&category=wildfires&limit=50`;
+      const res = await fetch(url);
+      if (!res.ok) return [];
+      const data = await res.json();
+      const events = data?.events || [];
+      return events.map(ev=>{
+        const geom = ev.geometry?.[ev.geometry.length-1];
+        const when = geom?.date || isoNowMinus(0);
+        const coords = geom?.coordinates;
+        let latlon = "Global";
+        if (Array.isArray(coords)) {
+          // EONET uses [lon, lat]
+          const lon = Array.isArray(coords[0]) ? coords[0][0] : coords[0];
+          const lat = Array.isArray(coords[0]) ? coords[0][1] : coords[1];
+          latlon = `${(+lat).toFixed(4)}, ${(+lon).toFixed(4)}`;
+        }
+        return {
+          title: ev.title || "Wildfire",
+          summary: `Reported by EONET • ${latlon}`,
+          event: "Wildfire",
+          severity: "Moderate",
+          urgency: "Immediate",
+          area: latlon,
+          effective: when,
+          expires: "",
+          source: "NASA EONET",
+          url: (ev.links && ev.links[0] && ev.links[0].href) || "https://eonet.gsfc.nasa.gov/"
+        };
+      });
+    }
+
+    // USGS NWIS (river gauges)
+    async function fetchNWIS(sites){
+      const url = `https://waterservices.usgs.gov/nwis/iv/?format=json&sites=${sites.join(",")}&parameterCd=00065,00060`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const ts = data?.value?.timeSeries || [];
+      const out=[];
+      ts.forEach(series=>{
+        const siteName = series?.sourceInfo?.siteName || "USGS Site";
+        const parm = series?.variable?.variableName || "Value";
+        const points = series?.values?.[0]?.value || [];
+        if (!points.length) return;
+        const last = points[points.length-1];
+        out.push({
+          title: `River ${parm} — ${siteName}`,
+          summary: `Latest reading: ${last.value}.`,
+          event: "River Level",
+          severity: "Moderate",
+          urgency: "Expected",
+          area: siteName,
+          effective: last.dateTime || isoNowMinus(0),
+          expires: "",
+          source: "USGS (NWIS)",
+          url: "https://waterdata.usgs.gov/monitoring-location/" + (series?.sourceInfo?.siteCode?.[0]?.value || "")
+        });
+      });
+      return out;
+    }
+
+    // WMATA (optional key)
+    async function fetchWMATAIncidents(){
+      if (!CONFIG.WMATA_API_KEY) return [];
+      const url = "https://api.wmata.com/Incidents.svc/json/Incidents";
+      const res = await fetch(url, { headers: { "api_key": CONFIG.WMATA_API_KEY } });
+      const data = await res.json();
+      const list = data?.Incidents || [];
+      return list.map(i=>({
+        title: `Transit Incident — ${i.IncidentType || "WMATA"}`,
+        summary: i.Description || "",
+        event: "Transit",
+        severity: "Moderate",
+        urgency: "Immediate",
+        area: i.LinesAffected || "WMATA Metro",
+        effective: isoNowMinus(0),
+        expires: "",
+        source: "WMATA",
+        url: "https://wmata.com/service/status/"
+      }));
+    }
+
+    // --------------- DASHBOARD ---------------
+    class EmergencyAlertDashboard{
+      constructor(){
+        this.alertsContainer = document.getElementById('alerts-container');
+        this.lastUpdatedElement = document.getElementById('last-updated');
+        this.sourceList = document.getElementById('source-list');
+        this.refreshInterval = CONFIG.refreshMs;
+        this.init();
+      }
+      init(){
+        this.fetchAll();
+        setInterval(()=>this.fetchAll(), this.refreshInterval);
+      }
+      async fetchAll(){
+        try{
+          this.alertsContainer.innerHTML = `<div class="loading">Loading emergency alerts...</div>`;
+
+          const eqPromise = fetchUSGSEarthquakes(CONFIG.center.lat, CONFIG.center.lon, CONFIG.radiusKm);
+          const firePromise = TEST_MODE
+            ? (CONFIG.FIRMS_API_KEY ? fetchFIRMSGlobal(3) : fetchEONETWildfires())
+            : fetchFIRMS(CONFIG.bbox, 7);
+
+          const [nws, eq, fires, nwis, wmata] = await Promise.allSettled([
+            fetchNWSAlerts(CONFIG.center.lat, CONFIG.center.lon),
+            eqPromise,
+            firePromise,
+            fetchNWIS(CONFIG.nwisSites),
+            fetchWMATAIncidents()
+          ]);
+
+          const results = [
+            ...(nws.value || []),
+            ...(eq.value || []),
+            ...(fires.value || []),
+            ...(nwis.value || []),
+            ...(wmata.value || [])
+          ];
+
+          if (TEST_MODE && results.length===0){
+            results.push({
+              title:"Demo: System Check / No Live Alerts",
+              summary:"Test mode is enabled. Live sources returned no items right now, so this placeholder proves the UI is working.",
+              event:"System",
+              severity:"Moderate",
+              urgency:"Expected",
+              area:"Global",
+              effective: isoNowMinus(5*60*1000),
+              expires:"",
+              source:"Dashboard",
+              url:""
+            });
+          }
+
+          this.processAlerts(results);
+          this.updateProvenance(results);
+          this.updateLastUpdated();
+
+        }catch(e){
+          console.error("Fetch error:", e);
+          this.showError();
+        }
+      }
+      processAlerts(alerts){
+        if (!alerts || alerts.length===0){ this.showNoAlerts(); return; }
+        const normalized = alerts.map(a => ({...a, urgency: mapUrgencyByWords(a.severity || a.urgency || a.event)}));
+        normalized.sort((a,b)=> new Date(b.effective||0)-new Date(a.effective||0));
+        this.renderAlerts(normalized);
+      }
+      renderAlerts(alerts){
+        this.alertsContainer.innerHTML = alerts.map(alert=>{
+          const urgency = this.mapUrgency(alert.severity, alert.urgency);
+          const timeAgo = getTimeAgo(new Date(alert.effective));
+          const location = alert.area || "Local";
+          const srcIcon = this.iconForSource(alert.source || "");
+          const link = alert.url ? `<a href="${alert.url}" target="_blank" rel="noopener">details</a>` : ``;
+          return `
+            <div class="alert-item ${urgency}">
+              <div class="alert-header">
+                <div>
+                  <div class="urgency-badge ${urgency}">${urgency}</div>
+                  <div class="time-location">${timeAgo} • ${htmlEscape(location)}</div>
+                </div>
+              </div>
+              <div class="alert-title">${htmlEscape(alert.title)}</div>
+              ${alert.summary ? `<div class="alert-summary">${htmlEscape(alert.summary)}</div>` : ``}
+              <div class="source-chip">${srcIcon} ${htmlEscape(alert.source || "Source")} ${link ? "• " + link : ""}</div>
+              <div class="relevance-section">
+                <div class="relevance-label">Relevant to you?</div>
+                <div class="relevance-buttons">
+                  <button class="relevance-btn thumbs-up" onclick="handleRelevance(this, true)">👍</button>
+                  <button class="relevance-btn thumbs-down" onclick="handleRelevance(this, false)">👎</button>
+                </div>
+              </div>
+            </div>`;
+        }).join("");
+      }
+      iconForSource(src){
+        const s = (src||"").toLowerCase();
+        if (s.includes("nws")) return `<i class="fas fa-bolt"></i>`;
+        if (s.includes("earthquakes") || s.includes("earthquake")) return `<i class="fas fa-mountain-sun"></i>`;
+        if (s.includes("nwis")) return `<i class="fas fa-water"></i>`;
+        if (s.includes("firms") || s.includes("eonet") || s.includes("nasa")) return `<i class="fas fa-satellite"></i>`;
+        if (s.includes("wmata")) return `<i class="fas fa-train-subway"></i>`;
+        if (s.includes("dashboard")) return `<i class="fas fa-circle-check"></i>`;
+        return `<i class="fas fa-circle-info"></i>`;
+      }
+      mapUrgency(severity, word){
+        const s = (severity || word || "").toLowerCase();
+        if (s.includes("extreme")||s.includes("severe")||s.includes("warning")||s.includes("immediate")) return "urgent";
+        if (s.includes("moderate")||s.includes("watch")||s.includes("advisory")||s.includes("expected")) return "moderate";
+        return "minor";
+      }
+      updateProvenance(alerts){
+        const sourcesLower = alerts.map(a => (a.source || "").toLowerCase());
+        const hasNWS   = sourcesLower.some(s => s.includes("nws"));
+        const hasEQ    = sourcesLower.some(s => s.includes("earthquake"));
+        const hasNWIS  = sourcesLower.some(s => s.includes("nwis"));
+        const hasFires = sourcesLower.some(s => s.includes("firms") || s.includes("eonet") || s.includes("nasa"));
+        const hasWMATA = sourcesLower.some(s => s.includes("wmata"));
+
+        const items = [];
+        if (hasNWS)   items.push(`<li><i class="fas fa-bolt"></i> NWS Weather Alerts</li>`);
+        if (hasEQ)    items.push(`<li><i class="fas fa-mountain-sun"></i> USGS Earthquakes</li>`);
+        if (hasNWIS)  items.push(`<li><i class="fas fa-water"></i> USGS NWIS (Rivers)</li>`);
+        if (hasFires) items.push(`<li><i class="fas fa-satellite"></i> NASA FIRMS / EONET (Fires)</li>`);
+        if (hasWMATA) items.push(`<li><i class="fas fa-train-subway"></i> WMATA Incidents</li>`);
+        if (!items.length) items.push(`<li><i class="fas fa-circle-info"></i> No sources returned data</li>`);
+        this.sourceList.innerHTML = items.join("");
+      }
+      showNoAlerts(){
+        this.alertsContainer.innerHTML = `
+          <div class="no-alerts">
+            <h3>No Active Alerts</h3>
+            <p>All systems are currently normal for the selected area.</p>
+          </div>`;
+      }
+      showError(){
+        this.alertsContainer.innerHTML = `
+          <div class="no-alerts">
+            <h3>Connection Error</h3>
+            <p>Unable to fetch current alerts. Retrying automatically...</p>
+          </div>`;
+      }
+      updateLastUpdated(){
+        const now = new Date();
+        if (this.lastUpdatedElement) {
+          this.lastUpdatedElement.textContent = `Last updated: ${now.toLocaleTimeString()}`;
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{ new EmergencyAlertDashboard(); });
+  </script>
+</body>
+</html>
