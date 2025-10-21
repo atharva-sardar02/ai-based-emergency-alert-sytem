@@ -46,6 +46,8 @@
     .urgency-level.High{background:#dc3545}
     .urgency-level.Medium{background:#fd7e14}
     .urgency-level.Low{background:#ffc107;color:#333}
+    .urgency-level:hover {transform: scale(1.05); cursor: pointer; opacity: 0.9;}
+
     .provenance h3{margin-bottom:15px;font-size:1.2rem}
     .source-list{list-style:none}
     .source-list li{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:.95rem}
@@ -92,7 +94,7 @@
 
     <div class="dashboard">
       <div class="alerts-section">
-        <h2><span class="status-indicator"></span>Alerts</h2>
+        <h2><span class="status-indicator"></span>Emergency Alerts</h2>
         <div id="filter-bar" style="margin:10px 0 15px; display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
           <span style="opacity:.8">Filter by source:</span>
           <div id="filter-options" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
@@ -106,10 +108,12 @@
         <div class="urgency-panel">
           <h2>Criticality</h2>
           <div class="urgency-indicator">
-            <div class="urgency-level High">High</div>
-            <div class="urgency-level Medium">Medium</div>
-            <div class="urgency-level Low">Low</div>
-          </div>
+              <div class="urgency-level High" onclick="filterByCriticality('High')">High</div>
+              <div class="urgency-level Medium" onclick="filterByCriticality('Medium')">Medium</div>
+              <div class="urgency-level Low" onclick="filterByCriticality('Low')">Low</div>
+              <div class="urgency-level" style="background:rgba(255,255,255,0.1);cursor:pointer;" onclick="filterByCriticality('All')">Show All</div>
+            </div>
+
 
           <div class="provenance">
             <h3>Active Data Sources</h3>
@@ -125,7 +129,7 @@
   <!-- Detail Modal -->
   <div id="detail-modal" class="modal">
     <div class="modal-content">
-      <span class="close-modal" onclick="closeDetailModal()">&times;</span>
+      
       <div id="modal-body"></div>
     </div>
   </div>
@@ -461,6 +465,34 @@
         document.getElementById('filter-options').innerHTML = '';
       }
     }
+
+              // Filter alerts by criticality (High, Medium, Low)
+          function filterByCriticality(level) {
+            const container = document.getElementById('alerts-container');
+
+            if (!window.__lastData || !window.__lastData.alerts) return;
+
+            // Filter logic
+            let filteredAlerts = window.__lastData.alerts;
+            if (level !== 'All') {
+              filteredAlerts = filteredAlerts.filter(a => 
+                a.latest_classification?.criticality === level
+              );
+            }
+
+        // Highlight active button
+        document.querySelectorAll('.urgency-level').forEach(el => {
+          el.style.outline = 'none';
+          if (el.textContent.trim() === level) {
+            el.style.outline = '2px solid #ffd76a';
+            el.style.outlineOffset = '2px';
+          }
+        });
+
+        // Render filtered alerts
+        renderAlerts({ alerts: filteredAlerts });
+      }
+
 
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {

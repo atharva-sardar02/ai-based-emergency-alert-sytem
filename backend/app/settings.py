@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     TEST_MODE: bool = False
     REFRESH_INTERVAL_SECONDS: int = 300
     LOG_LEVEL: str = "INFO"
+
+    #OPENAI
+    OPENAI_API_KEY: str = ""
     
     # CORS - can be a comma-separated string or list
     CORS_ORIGINS: Union[str, List[str]] = "http://localhost:3000,http://localhost:8000,http://127.0.0.1:8000,http://127.0.0.1:3000"
