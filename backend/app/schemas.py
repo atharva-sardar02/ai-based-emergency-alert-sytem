@@ -52,6 +52,8 @@ class AlertBase(BaseModel):
     effective_at: datetime
     expires_at: Optional[datetime] = None
     url: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 class AlertCreate(AlertBase):

@@ -39,7 +39,17 @@ Real-time emergency alert system for the City of Alexandria, integrating data fr
 - **Modern UI**: Clean, responsive interface with color-coded criticality badges
 - **Interactive**: View details, acknowledge alerts, hide irrelevant items
 - **Detail Modal**: Full alert information with AI classification rationale
+- **Map View**: Interactive map with alert locations and filtering
 - **Test Mode**: Virginia-wide alerts for demonstrations
+
+### Interactive Map Visualization
+- **Leaflet.js Integration**: Interactive map with zoom and pan controls
+- **Location Plotting**: Alerts displayed as markers with coordinates
+- **Smart Markers**: Color-coded by criticality (Red/Orange/Yellow)
+- **Source Icons**: Custom icons for different alert sources (NWS, USGS, etc.)
+- **Filtering**: Filter by source and criticality level
+- **Auto-fit Bounds**: Map automatically adjusts to show all visible alerts
+- **Real-time Updates**: Map refreshes every 60 seconds with new data
 
 ---
 
@@ -381,7 +391,8 @@ Get free API keys for enhanced functionality:
 │   ├── requirements.txt         # Dependencies
 │   └── .env                     # Configuration
 ├── frontend/
-│   └── index.html               # Dashboard UI
+│   ├── index.html               # Dashboard UI (List View)
+│   └── map.html                 # Map View with Leaflet.js
 ├── docker-compose.yml           # PostgreSQL setup
 └── README.md                    # This file
 ```
@@ -602,7 +613,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ### Version 0.2 (Next)
 - [ ] User authentication and roles
-- [ ] Map visualization with alert polygons
+- [x] Map visualization with alert locations
 - [ ] Email/SMS notifications
 - [ ] Mobile responsive improvements
 

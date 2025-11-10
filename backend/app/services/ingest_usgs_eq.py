@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from app.services.ingest_base import BaseIngestionService
 from app.settings import settings
 from app.utils.time_utils import parse_datetime, utc_now, time_window_start
+from app.utils.geo_utils import extract_point_from_geometry
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +98,15 @@ class IngestUSGSEarthquakes(BaseIngestionService):
             else:
                 effective_at = utc_now()
             
+            # Extract coordinates from GeoJSON geometry
+            latitude = None
+            longitude = None
+            geometry = raw_item.get('geometry')
+            if geometry:
+                coords = extract_point_from_geometry(geometry)
+                if coords:
+                    latitude, longitude = coords
+            
             # Build normalized alert
             normalized = {
                 'source': self.source_name,
@@ -110,7 +120,9 @@ class IngestUSGSEarthquakes(BaseIngestionService):
                 'effective_at': effective_at,
                 'expires_at': None,
                 'url': props.get('url'),
-                'raw_payload': json.dumps(raw_item)
+                'raw_payload': json.dumps(raw_item),
+                'latitude': latitude,
+                'longitude': longitude
             }
             
             return normalized

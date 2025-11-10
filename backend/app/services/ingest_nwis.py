@@ -7,6 +7,7 @@ from typing import Any, List, Dict, Optional
 from app.services.ingest_base import BaseIngestionService
 from app.settings import settings
 from app.utils.time_utils import parse_datetime, utc_now
+from app.utils.geo_utils import validate_coordinates
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +79,24 @@ class IngestNWIS(BaseIngestionService):
             
             effective_at = parse_datetime(timestamp) if timestamp else utc_now()
             
+            # Extract coordinates from site location
+            latitude = None
+            longitude = None
+            geo_location = source_info.get('geoLocation', {})
+            geog_location = geo_location.get('geogLocation', {})
+            if geog_location:
+                try:
+                    lat = geog_location.get('latitude')
+                    lon = geog_location.get('longitude')
+                    if lat is not None and lon is not None:
+                        latitude = float(lat)
+                        longitude = float(lon)
+                        if not validate_coordinates(latitude, longitude):
+                            latitude = None
+                            longitude = None
+                except (ValueError, TypeError):
+                    pass
+            
             # Build normalized alert
             normalized = {
                 'source': self.source_name,
@@ -91,7 +110,9 @@ class IngestNWIS(BaseIngestionService):
                 'effective_at': effective_at,
                 'expires_at': None,
                 'url': f"https://waterdata.usgs.gov/monitoring-location/{site_code}",
-                'raw_payload': json.dumps(raw_item)
+                'raw_payload': json.dumps(raw_item),
+                'latitude': latitude,
+                'longitude': longitude
             }
             
             return normalized

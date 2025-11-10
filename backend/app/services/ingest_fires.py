@@ -100,8 +100,27 @@ class IngestFires(BaseIngestionService):
     def normalize_item(self, raw_item: Any) -> Optional[Dict[str, Any]]:
         """Normalize FIRMS fire detection to common schema."""
         try:
-            latitude = raw_item.get('latitude', '')
-            longitude = raw_item.get('longitude', '')
+            # Extract coordinates (already in lat/lon format)
+            latitude_str = raw_item.get('latitude', '')
+            longitude_str = raw_item.get('longitude', '')
+            latitude = None
+            longitude = None
+            
+            # Try to convert to float
+            try:
+                if latitude_str:
+                    latitude = float(latitude_str)
+                if longitude_str:
+                    longitude = float(longitude_str)
+            except (ValueError, TypeError):
+                pass
+            
+            # Validate coordinates
+            from app.utils.geo_utils import validate_coordinates
+            if not validate_coordinates(latitude, longitude):
+                latitude = None
+                longitude = None
+            
             brightness = raw_item.get('bright_ti4', '')
             confidence = raw_item.get('confidence', '')
             acq_date = raw_item.get('acq_date', '')
@@ -141,7 +160,7 @@ class IngestFires(BaseIngestionService):
             # Build normalized alert
             normalized = {
                 'source': self.source_name,
-                'provider_id': f"{latitude}_{longitude}_{acq_date}_{acq_time}",  # Composite ID
+                'provider_id': f"{latitude_str}_{longitude_str}_{acq_date}_{acq_time}",  # Composite ID
                 'title': title[:500],
                 'summary': f"Fire or thermal anomaly detected via satellite. Confidence: {confidence}. Location: {location}",
                 'event_type': 'Fire',
@@ -151,7 +170,9 @@ class IngestFires(BaseIngestionService):
                 'effective_at': effective_at,
                 'expires_at': None,
                 'url': "https://firms.modaps.eosdis.nasa.gov/map/",
-                'raw_payload': json.dumps(raw_item)
+                'raw_payload': json.dumps(raw_item),
+                'latitude': latitude,
+                'longitude': longitude
             }
             
             return normalized

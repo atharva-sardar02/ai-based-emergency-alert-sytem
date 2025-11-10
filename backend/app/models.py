@@ -1,5 +1,5 @@
 """SQLAlchemy ORM models for the emergency alert system."""
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Index, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Index, UniqueConstraint, Float
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.database import Base
@@ -32,6 +32,10 @@ class Alert(Base):
     url = Column(Text, nullable=True)
     raw_payload = Column(Text, nullable=True)  # JSON string
     
+    # Location (for map visualization)
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
+    
     # Relationships
     classifications = relationship("Classification", back_populates="alert", cascade="all, delete-orphan")
     user_actions = relationship("UserAction", back_populates="alert", cascade="all, delete-orphan")
@@ -40,6 +44,7 @@ class Alert(Base):
     __table_args__ = (
         Index('idx_alerts_effective_at', 'effective_at'),
         Index('idx_alerts_source_provider', 'source', 'provider_id'),
+        Index('idx_alerts_location', 'latitude', 'longitude'),
     )
 
 

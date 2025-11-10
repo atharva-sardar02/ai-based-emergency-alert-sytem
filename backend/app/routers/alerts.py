@@ -79,6 +79,8 @@ async def list_alerts(
                 "expires_at": alert.expires_at,
                 "url": alert.url,
                 "created_at": alert.created_at,
+                "latitude": alert.latitude,
+                "longitude": alert.longitude,
                 "latest_classification": None,
                 "user_actions": []
             }
@@ -160,6 +162,8 @@ async def get_alert_detail(
             "expires_at": alert.expires_at,
             "url": alert.url,
             "created_at": alert.created_at,
+            "latitude": alert.latitude,
+            "longitude": alert.longitude,
             "raw_payload": alert.raw_payload,
             "latest_classification": None,
             "user_actions": []

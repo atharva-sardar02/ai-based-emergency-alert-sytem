@@ -58,7 +58,9 @@ class BaseIngestionService(ABC):
                 'effective_at': datetime,
                 'expires_at': Optional[datetime],
                 'url': Optional[str],
-                'raw_payload': str (JSON)
+                'raw_payload': str (JSON),
+                'latitude': Optional[float],
+                'longitude': Optional[float]
             }
         """
         pass
@@ -97,7 +99,9 @@ class BaseIngestionService(ABC):
                 effective_at=normalized['effective_at'],
                 expires_at=normalized.get('expires_at'),
                 url=normalized.get('url'),
-                raw_payload=normalized.get('raw_payload')
+                raw_payload=normalized.get('raw_payload'),
+                latitude=normalized.get('latitude'),
+                longitude=normalized.get('longitude')
             )
             
             self.db.add(alert)

@@ -37,7 +37,11 @@
     .action-btn.view-more:hover{background:#218838}
     .action-btn.not-relevant{background:rgba(220,53,69,.3);color:#fff}
     .action-btn.not-relevant:hover{background:rgba(220,53,69,.6)}
+    .action-btn.view-map{background:#17a2b8;color:#fff}
+    .action-btn.view-map:hover{background:#138496}
     .action-btn:disabled{opacity:.5;cursor:not-allowed}
+    .alert-item.highlighted{box-shadow:0 0 20px rgba(255,215,106,0.6);border:2px solid #ffd76a;animation:pulseHighlight 2s ease-in-out}
+    @keyframes pulseHighlight{0%,100%{box-shadow:0 0 20px rgba(255,215,106,0.6)}50%{box-shadow:0 0 30px rgba(255,215,106,0.9)}}
     .acknowledged-badge{background:rgba(40,167,69,.3);color:#90ee90;padding:4px 10px;border-radius:4px;font-size:.75rem;font-weight:600}
     .sidebar{display:flex;flex-direction:column;gap:30px}
     .urgency-panel{background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border-radius:12px;padding:25px}
@@ -86,8 +90,20 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>Alexandria Emergency Alert Dashboard</h1>
-      <p>Real-time emergency alert system integrating data from NWS, USGS, NASA, and WMATA with AI-powered criticality classification.</p>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px">
+        <div>
+          <h1>Alexandria Emergency Alert Dashboard</h1>
+          <p>Real-time emergency alert system integrating data from NWS, USGS, NASA, and WMATA with AI-powered criticality classification.</p>
+        </div>
+        <div style="display:flex;gap:10px">
+          <a href="index.html" style="padding:10px 20px;border-radius:6px;background:rgba(255,255,255,.1);color:#fff;text-decoration:none;font-weight:600;transition:all .2s">
+            <i class="fas fa-list"></i> List View
+          </a>
+          <a href="map.html" style="padding:10px 20px;border-radius:6px;background:#28a745;color:#fff;text-decoration:none;font-weight:600;transition:all .2s">
+            <i class="fas fa-map"></i> Map View
+          </a>
+        </div>
+      </div>
     </div>
 
     <div class="dashboard">
@@ -170,6 +186,7 @@
     // API Calls
     async function fetchAlerts(){
       // Fetch all alerts including irrelevant ones (we'll sort them to bottom)
+      // Using limit=100 (API max) and show_irrelevant=true to get all alerts
       const response = await fetch(`${API_BASE}/alerts?limit=100&show_irrelevant=true`);
       if (!response.ok) throw new Error('Failed to fetch alerts');
       return response.json();
@@ -212,6 +229,10 @@
       }
     }
 
+    function viewOnMap(alertId){
+      window.location.href = `map.html#alert-${alertId}`;
+    }
+
     async function showAlertDetail(alertId){
       try {
         const alert = await fetchAlertDetail(alertId);
@@ -219,6 +240,26 @@
       } catch(e) {
         console.error(e);
         alert('Failed to load alert details');
+      }
+    }
+    
+    // Handle hash-based navigation (from map)
+    function handleHashNavigation() {
+      const hash = window.location.hash;
+      if (!hash || !hash.startsWith('#alert-')) return;
+      
+      const alertId = hash.replace('#alert-', '');
+      const alertElement = document.getElementById(`alert-${alertId}`);
+      
+      if (alertElement) {
+        // Scroll to the alert
+        alertElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Highlight it temporarily
+        alertElement.classList.add('highlighted');
+        setTimeout(() => {
+          alertElement.classList.remove('highlighted');
+        }, 3000);
       }
     }
 
@@ -350,8 +391,12 @@
         const link = alert.url ? `<a href="${alert.url}" target="_blank" rel="noopener">source</a>` : ``;
         const isAcknowledged = alert.user_actions?.some(a => a.action === 'acknowledged');
         
+        // Check if this alert should be highlighted (from hash)
+        const hash = window.location.hash;
+        const shouldHighlight = hash === `#alert-${alert.id}`;
+        
         return `
-          <div class="alert-item ${criticality}" style="${isIrrelevant ? 'opacity: 0.5; order: 999;' : ''}">
+          <div class="alert-item ${criticality} ${shouldHighlight ? 'highlighted' : ''}" id="alert-${alert.id}" style="${isIrrelevant ? 'opacity: 0.5; order: 999;' : ''}">
             <div class="alert-header">
               <div>
                 <div class="urgency-badge ${criticality}">${criticality}</div>
@@ -366,6 +411,7 @@
             <div class="action-section">
               <div class="action-buttons">
                 <button class="action-btn view-more" onclick="showAlertDetail(${alert.id})">Know More</button>
+                ${alert.latitude != null && alert.longitude != null ? `<button class="action-btn view-map" onclick="viewOnMap(${alert.id})">View on Map</button>` : ''}
                 ${!isIrrelevant ? `<button class="action-btn not-relevant" onclick="handleNotRelevant(${alert.id}, this)">Irrelevant</button>` : ''}
               </div>
             </div>
@@ -466,6 +512,18 @@
     document.addEventListener('DOMContentLoaded', () => {
       loadAlerts();
       setInterval(loadAlerts, REFRESH_MS);
+      
+      // Handle hash navigation after initial load
+      setTimeout(() => {
+        handleHashNavigation();
+      }, 1000);
+      
+      // Also handle hash changes (e.g., if user navigates back)
+      window.addEventListener('hashchange', () => {
+        setTimeout(() => {
+          handleHashNavigation();
+        }, 100);
+      });
     });
   </script>
 </body>

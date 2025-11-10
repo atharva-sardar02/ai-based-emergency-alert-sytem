@@ -8,6 +8,7 @@ from datetime import datetime
 from app.services.ingest_base import BaseIngestionService
 from app.settings import settings
 from app.utils.time_utils import parse_datetime, utc_now
+from app.utils.geo_utils import extract_point_from_geometry
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +69,15 @@ class IngestNWS(BaseIngestionService):
             if not effective_at:
                 effective_at = utc_now()
             
+            # Extract coordinates from GeoJSON geometry
+            latitude = None
+            longitude = None
+            geometry = raw_item.get('geometry')
+            if geometry:
+                coords = extract_point_from_geometry(geometry)
+                if coords:
+                    latitude, longitude = coords
+            
             # Build normalized alert
             normalized = {
                 'source': self.source_name,
@@ -81,7 +91,9 @@ class IngestNWS(BaseIngestionService):
                 'effective_at': effective_at,
                 'expires_at': parse_datetime(props.get('expires') or props.get('ends')),
                 'url': props.get('id') or props.get('@id'),
-                'raw_payload': json.dumps(raw_item)
+                'raw_payload': json.dumps(raw_item),
+                'latitude': latitude,
+                'longitude': longitude
             }
             
             return normalized
