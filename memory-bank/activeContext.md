@@ -36,6 +36,36 @@ The Alexandria Emergency Alert System MVP is fully functional with all core feat
 
 **No active development tasks** - System is complete and production-ready.
 
+## Weekly Time Tracking Process
+
+**Location**: `toggl/` directory
+
+**Weekly Workflow**:
+1. Create breakdown document: `toggl/Week_Nov_DD-DD_YYYY.md` (e.g., `Week_Nov_08-09_2025.md`)
+   - Document all weekend work (Saturday & Sunday)
+   - Break down by day, session, and task
+   - Include troubleshooting time and issues faced
+   - Total should be ~20 hours (10 hours per day)
+
+2. Create CSV import file: `toggl/toggl_import_Nov_DD-DD_YYYY.csv`
+   - Use template: `toggl/toggl_template.csv`
+   - **Critical Format Requirements**:
+     - Start date: `YYYY-MM-DD` (e.g., `2025-11-08`)
+     - Start time: `HH:MM:SS` (e.g., `09:00:00`) - NOT `HH:MM`
+     - Duration: `HH:MM:SS` (e.g., `00:30:00`) - NOT decimal hours
+     - Project: "Crowdlabs"
+     - Email: "atharva.sardar02@gmail.com"
+   - Ensure dates are Saturday and Sunday (not Sunday/Monday)
+   - No empty lines at end of file
+   - UTF-8 encoding
+
+3. Import to Toggl Track:
+   - Settings → Import → Upload CSV
+   - Verify preview shows correct entries
+   - Import
+
+**Reference**: See `toggl/WEEKLY_TOGGL_TEMPLATE.md` for complete format requirements and examples.
+
 ### Immediate Considerations
 1. **Configuration**: Set `TEST_MODE=false` in `.env` for production (Alexandria-only alerts)
 2. **API Keys**: Optional setup for FIRMS and WMATA sources (see `API_KEYS_INFO.md`)

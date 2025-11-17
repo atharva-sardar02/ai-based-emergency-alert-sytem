@@ -48,6 +48,9 @@ alerts.db
 *.swo
 *~
 
+# Toggl
+toggl/
+
 # OS
 .DS_Store
 Thumbs.db
