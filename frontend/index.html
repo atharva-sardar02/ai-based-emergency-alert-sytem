@@ -16,38 +16,36 @@
     .alerts-section h2,.urgency-section h2{font-size:1.8rem;margin-bottom:25px;font-weight:600}
     .alert-item{background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border-radius:12px;padding:20px;margin-bottom:20px;border-left:5px solid;position:relative;transition:transform .2s ease, box-shadow .2s ease;display:flex;flex-direction:column;word-wrap:break-word;overflow-wrap:break-word}
     .alert-item:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(0,0,0,.2)}
-    .alert-item.High{border-left-color:#dc3545;background:rgba(220,53,69,.1)}
-    .alert-item.Medium{border-left-color:#fd7e14;background:rgba(253,126,20,.1)}
-    .alert-item.Low{border-left-color:#ffc107;background:rgba(255,193,7,.1)}
+    .alert-item.urgent{border-left-color:#dc3545;background:rgba(220,53,69,.1)}
+    .alert-item.moderate{border-left-color:#fd7e14;background:rgba(253,126,20,.1)}
+    .alert-item.minor{border-left-color:#ffc107;background:rgba(255,193,7,.1)}
     .alert-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:15px}
     .urgency-badge{padding:6px 14px;border-radius:20px;font-size:.8rem;font-weight:600;text-transform:capitalize}
-    .urgency-badge.High{background:#dc3545}
-    .urgency-badge.Medium{background:#fd7e14}
-    .urgency-badge.Low{background:#ffc107;color:#333}
+    .urgency-badge.urgent{background:#dc3545}
+    .urgency-badge.moderate{background:#fd7e14}
+    .urgency-badge.minor{background:#ffc107;color:#333}
     .time-location{font-size:.9rem;opacity:.8;margin-bottom:8px}
     .alert-title{font-size:1.1rem;font-weight:600;line-height:1.4;margin-bottom:8px}
     .alert-summary{font-size:.95rem;opacity:.95;margin-bottom:10px}
     .source-chip{font-size:.8rem;opacity:.9;margin-top:6px;display:inline-flex;gap:8px;align-items:center}
     .source-chip a{color:#ffd76a;text-decoration:none}
-    .action-section{margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .action-buttons{display:flex;gap:10px}
-    .action-btn{padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-size:.85rem;transition:all .2s ease;font-weight:600}
-    .action-btn:hover{transform:translateY(-1px)}
-    .action-btn.view-more{background:#28a745;color:#fff}
-    .action-btn.view-more:hover{background:#218838}
-    .action-btn.not-relevant{background:rgba(220,53,69,.3);color:#fff}
-    .action-btn.not-relevant:hover{background:rgba(220,53,69,.6)}
-    .action-btn:disabled{opacity:.5;cursor:not-allowed}
-    .acknowledged-badge{background:rgba(40,167,69,.3);color:#90ee90;padding:4px 10px;border-radius:4px;font-size:.75rem;font-weight:600}
+    .relevance-label{font-size:.8rem;color:#ffc107;margin-bottom:8px}
+    .relevance-section{margin-top:10px;display:flex;align-items:center;justify-content:space-between}
+    .relevance-buttons{display:flex;gap:10px}
+    .relevance-btn{width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;transition:all .2s ease}
+    .relevance-btn:hover{transform:scale(1.1)}
+    .relevance-btn.active{transform:scale(1.1);opacity:1}
+    .relevance-btn.thumbs-up{background:rgba(40,167,69,.2)}
+    .relevance-btn.thumbs-down{background:rgba(220,53,69,.2)}
+    .relevance-btn.thumbs-up.active{background:#28a745;color:#fff}
+    .relevance-btn.thumbs-down.active{background:#dc3545;color:#fff}
+    .relevance-btn:disabled{opacity:.5;cursor:not-allowed}
     .sidebar{display:flex;flex-direction:column;gap:30px}
     .urgency-panel{background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border-radius:12px;padding:25px}
     .urgency-indicator{display:flex;flex-direction:column;gap:12px;margin-bottom:30px}
     .urgency-level{padding:12px 20px;border-radius:8px;text-align:center;font-weight:600}
-    .urgency-level.High{background:#dc3545}
-    .urgency-level.Medium{background:#fd7e14}
-    .urgency-level.Low{background:#ffc107;color:#333}
-    .urgency-level:hover {transform: scale(1.05); cursor: pointer; opacity: 0.9;}
-
+    .urgency-level.urgent{background:#dc3545}
+    .urgency-level.moderate{background:#fd7e14}
     .provenance h3{margin-bottom:15px;font-size:1.2rem}
     .source-list{list-style:none}
     .source-list li{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:.95rem}
@@ -57,68 +55,39 @@
     .status-indicator{display:inline-block;width:12px;height:12px;background:#28a745;border-radius:50%;margin-right:8px;animation:pulse 2s infinite}
     @keyframes pulse{0%{opacity:1}50%{opacity:.5}100%{opacity:1}}
     .last-updated{text-align:right;font-size:.8rem;opacity:.7;margin-top:20px}
-    
-    /* Detail Modal */
-    .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,0.7);animation:fadeIn .3s}
-    .modal.active{display:block}
-    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-    .modal-content{background:#001f3f;margin:5% auto;padding:30px;border:1px solid rgba(255,255,255,.2);border-radius:12px;width:90%;max-width:800px;position:relative;animation:slideIn .3s}
-    @keyframes slideIn{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
-    .close-modal{color:#aaa;float:right;font-size:28px;font-weight:bold;cursor:pointer;line-height:20px}
-    .close-modal:hover{color:#fff}
-    .modal-header{margin-bottom:20px;padding-bottom:15px;border-bottom:2px solid rgba(255,255,255,.2)}
-    .modal-title{font-size:1.5rem;margin-bottom:10px}
-    .modal-body{max-height:60vh;overflow-y:auto}
-    .detail-section{margin-bottom:20px}
-    .detail-section h3{font-size:1.1rem;margin-bottom:10px;color:#ffd76a}
-    .detail-section p{line-height:1.6;opacity:.9}
-    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
-    .detail-item{background:rgba(255,255,255,.05);padding:12px;border-radius:6px}
-    .detail-item label{display:block;font-size:.8rem;opacity:.7;margin-bottom:4px}
-    .detail-item value{font-size:.95rem;font-weight:600}
-    .raw-payload{background:rgba(0,0,0,.3);padding:15px;border-radius:6px;overflow-x:auto;font-family:monospace;font-size:.85rem;max-height:300px;overflow-y:auto}
-    .acknowledge-form{margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,.2)}
-    .acknowledge-form textarea{width:100%;padding:10px;border-radius:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-family:inherit;resize:vertical;min-height:80px}
-    .acknowledge-form button{margin-top:10px;padding:10px 20px;border-radius:6px;border:none;background:#28a745;color:#fff;cursor:pointer;font-weight:600}
-    .acknowledge-form button:hover{background:#218838}
-    
-    @media (max-width:768px){.dashboard{grid-template-columns:1fr;gap:20px}.header h1{font-size:2rem}.detail-grid{grid-template-columns:1fr}}
+    @media (max-width:768px){.dashboard{grid-template-columns:1fr;gap:20px}.header h1{font-size:2rem}}
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <h1>Alexandria Emergency Alert Dashboard</h1>
-      <p>Real-time emergency alert system integrating data from NWS, USGS, NASA, and WMATA with AI-powered criticality classification.</p>
+      <p>This project aims to develop a real-time emergency alert system that supports the decision-making processes of Alexandria's emergency management professionals. The platform integrates live data from various open-source intelligence (OSINT) sources such as Reddit, Twitter API, and satellite/news feeds to detect potential local crises including floods, riots, fires, and other hazards.</p>
     </div>
 
     <div class="dashboard">
       <div class="alerts-section">
-        <h2><span class="status-indicator"></span>Emergency Alerts</h2>
-        <div id="filter-bar" style="margin:10px 0 15px; display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
-          <span style="opacity:.8">Filter by source:</span>
-          <div id="filter-options" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
-          <button id="clear-filters" style="margin-left:auto;padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;cursor:pointer;">Clear</button>
-        </div>
+        <h2><span class="status-indicator"></span>Alerts</h2>
         <div id="alerts-container"><div class="loading">Loading emergency alerts...</div></div>
         <div class="last-updated" id="last-updated"></div>
       </div>
 
       <div class="sidebar">
         <div class="urgency-panel">
-          <h2>Criticality</h2>
+          <h2>Urgency</h2>
           <div class="urgency-indicator">
-              <div class="urgency-level High" onclick="filterByCriticality('High')">High</div>
-              <div class="urgency-level Medium" onclick="filterByCriticality('Medium')">Medium</div>
-              <div class="urgency-level Low" onclick="filterByCriticality('Low')">Low</div>
-              <div class="urgency-level" style="background:rgba(255,255,255,0.1);cursor:pointer;" onclick="filterByCriticality('All')">Show All</div>
-            </div>
-
+            <div class="urgency-level urgent">Urgent</div>
+            <div class="urgency-level moderate">Moderate</div>
+          </div>
 
           <div class="provenance">
-            <h3>Active Data Sources</h3>
+            <h3>Provenance</h3>
             <ul class="source-list" id="source-list">
-              <li style="opacity: 0.5;"><i class="fas fa-circle-notch fa-spin"></i> Loading sources...</li>
+              <li><i class="fas fa-bolt"></i> NWS Weather Alerts</li>
+              <li><i class="fas fa-mountain-sun"></i> USGS Earthquakes</li>
+              <li><i class="fas fa-water"></i> USGS NWIS (Rivers)</li>
+              <li><i class="fas fa-satellite"></i> NASA FIRMS / EONET (Fires)</li>
+              <li><i class="fas fa-train-subway"></i> WMATA Incidents</li>
             </ul>
           </div>
         </div>
@@ -126,380 +95,393 @@
     </div>
   </div>
 
-  <!-- Detail Modal -->
-  <div id="detail-modal" class="modal">
-    <div class="modal-content">
-      
-      <div id="modal-body"></div>
-    </div>
-  </div>
+  <!-- Provide a stub, then (optionally) load local secrets -->
+  <script>window.APP_SECRETS = window.APP_SECRETS || {};</script>
+  <script src="config.local.js"></script>
 
   <script>
-    // Configuration
-    const API_BASE = 'http://localhost:8000/api';
-    const REFRESH_MS = 60_000;
+    // ---------------- CONFIG ----------------
+    const TEST_MODE = true; // Trial mode -> global EQ + global wildfires (set true if you want)
+    const SECRETS = window.APP_SECRETS || {};
+    const CONFIG = {
+      center: { lat: 38.8048, lon: -77.0469 }, // Alexandria City Hall
+      radiusKm: TEST_MODE ? 500 : 10,
+      bbox: { minLon: -77.15, minLat: 38.75, maxLon: -77.00, maxLat: 38.87 }, // local FIRMS (prod)
+      nwisSites: ["01652500","01646500"],
+      refreshMs: 60_000,
+      FIRMS_API_KEY: SECRETS.FIRMS_API_KEY || "",   // <- pulled from config.local.js
+      WMATA_API_KEY: SECRETS.WMATA_API_KEY || ""    // <- pulled from config.local.js
+    };
 
-    // Utilities
+    // --------------- UTILITIES ---------------
+    function handleRelevance(button, isUpvote){
+      const container = button.parentElement;
+      const up = container.querySelector(".thumbs-up");
+      const down = container.querySelector(".thumbs-down");
+      if (isUpvote){ up.classList.add("active"); up.disabled = true; down.classList.remove("active"); down.disabled = true; }
+      else { down.classList.add("active"); down.disabled = true; up.classList.remove("active"); up.disabled = true; }
+    }
+    const isoNowMinus = ms => new Date(Date.now()-ms).toISOString();
     function getTimeAgo(date){
       const d = new Date(date); const diff = Date.now() - d.getTime();
       const m = Math.floor(diff/60000); if (m<60) return `${m}m ago`;
       const h = Math.floor(m/60); if (h<24) return `${h}h ago`;
       return `${Math.floor(h/24)}d ago`;
     }
-    
-    function htmlEscape(str=""){
-      return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    function mapUrgencyByWords(sev){
+      if (!sev) return "moderate";
+      const s = String(sev).toLowerCase();
+      if (s.includes("extreme")||s.includes("severe")||s.includes("warning")||s.includes("immediate")) return "urgent";
+      if (s.includes("watch")||s.includes("moderate")||s.includes("advisory")||s.includes("expected")) return "moderate";
+      return "minor";
     }
+    function htmlEscape(str=""){ return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
-    function iconForSource(src){
-      const s = (src||"").toLowerCase();
-      if (s.includes("nws")) return `<i class="fas fa-bolt"></i>`;
-      if (s.includes("earthquakes") || s.includes("usgs_earthquakes")) return `<i class="fas fa-mountain-sun"></i>`;
-      if (s.includes("nwis") || s.includes("usgs_nwis")) return `<i class="fas fa-water"></i>`;
-      if (s.includes("firms") || s.includes("eonet") || s.includes("nasa")) return `<i class="fas fa-fire"></i>`;
-      if (s.includes("wmata")) return `<i class="fas fa-train-subway"></i>`;
-      return `<i class="fas fa-circle-info"></i>`;
-    }
+    // --------------- FETCHERS ----------------
 
-    function sourceDisplayName(src){
-      const s = (src||"").toLowerCase();
-      if (s.includes("nws")) return "NWS Weather Alerts";
-      if (s.includes("earthquakes") || s.includes("usgs_earthquakes")) return "USGS Earthquakes";
-      if (s.includes("nwis") || s.includes("usgs_nwis")) return "USGS NWIS (Rivers)";
-      if (s.includes("firms") || s.includes("nasa_firms")) return "NASA FIRMS (Fires)";
-      if (s.includes("wmata")) return "WMATA Transit";
-      return src;
-    }
-
-    // API Calls
-    async function fetchAlerts(){
-      // Fetch all alerts including irrelevant ones (we'll sort them to bottom)
-      const response = await fetch(`${API_BASE}/alerts?limit=100&show_irrelevant=true`);
-      if (!response.ok) throw new Error('Failed to fetch alerts');
-      return response.json();
-    }
-
-    async function fetchAlertDetail(id){
-      const response = await fetch(`${API_BASE}/alerts/${id}`);
-      if (!response.ok) throw new Error('Failed to fetch alert detail');
-      return response.json();
-    }
-
-    async function markNotRelevant(id){
-      const response = await fetch(`${API_BASE}/alerts/${id}/not-relevant`, {method: 'POST'});
-      if (!response.ok) throw new Error('Failed to mark as not relevant');
-      return response.json();
-    }
-
-    async function acknowledgeAlert(id, note){
-      const response = await fetch(`${API_BASE}/alerts/${id}/acknowledge`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({note: note || null})
+    // NWS Alerts (VA-wide in test; point-local in prod)
+    async function fetchNWSAlerts(lat, lon){
+      const url = TEST_MODE
+        ? `https://api.weather.gov/alerts/active?area=VA`
+        : `https://api.weather.gov/alerts/active?point=${lat},${lon}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const feats = data.features || [];
+      return feats.map(f => {
+        const p = f.properties || {};
+        return {
+          title: p.headline || p.event || "NWS Alert",
+          summary: p.description || "",
+          event: p.event || "Alert",
+          severity: p.severity || "",
+          urgency: p.urgency || "",
+          area: p.areaDesc || "Alexandria area",
+          effective: p.effective || p.onset || p.sent || isoNowMinus(0),
+          expires: p.expires || p.ends || "",
+          source: "NWS",
+          url: p?.id || ""
+        };
       });
-      if (!response.ok) throw new Error('Failed to acknowledge alert');
-      return response.json();
     }
 
-    // Handlers
-    async function handleNotRelevant(alertId, button){
-      try {
-        button.disabled = true;
-        await markNotRelevant(alertId);
-        button.textContent = 'Moved';
-        // Reload immediately to move to bottom
-        await loadAlerts();
-      } catch(e) {
-        console.error(e);
-        alert('Failed to mark as not relevant');
-        button.disabled = false;
+    // USGS Earthquakes (global in TEST_MODE; local otherwise)
+    async function fetchUSGSEarthquakes(lat, lon, radiusKm){
+      let url;
+      if (TEST_MODE){
+        url = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&orderby=time&starttime=${new Date(Date.now()-48*3600*1000).toISOString()}&minmagnitude=4.5`;
+      } else {
+        url = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&latitude=${lat}&longitude=${lon}&maxradiuskm=${radiusKm}&orderby=time&starttime=${new Date(Date.now()-48*3600*1000).toISOString()}`;
       }
+      const res = await fetch(url);
+      const data = await res.json();
+      const feats = data.features || [];
+      return feats.slice(0,30).map(f => {
+        const p = f.properties || {};
+        const mag = p.mag != null ? `M${p.mag}` : "M?";
+        return {
+          title: `${mag} Earthquake — ${p.place || "Global"}`,
+          summary: `Magnitude ${p.mag ?? "?"}.`,
+          event: "Earthquake",
+          severity: (p.mag >= 6 ? "Severe" : p.mag >= 4.5 ? "Moderate" : "Minor"),
+          urgency: "Immediate",
+          area: p.place || "Global",
+          effective: p.time ? new Date(p.time).toISOString() : isoNowMinus(0),
+          expires: "",
+          source: "USGS (Earthquakes)",
+          url: p.url || ""
+        };
+      });
     }
 
-    async function showAlertDetail(alertId){
-      try {
-        const alert = await fetchAlertDetail(alertId);
-        renderDetailModal(alert);
-      } catch(e) {
-        console.error(e);
-        alert('Failed to load alert details');
+    // FIRMS (single bbox, used for production/local view)
+    async function fetchFIRMS(bbox, days=7){
+      if (!CONFIG.FIRMS_API_KEY) return [];
+      const key = CONFIG.FIRMS_API_KEY;
+      const {minLon, minLat, maxLon, maxLat} = bbox;
+      const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${key}/VIIRS_SNPP_NRT/${minLon},${minLat},${maxLon},${maxLat}/${days}`;
+      const res = await fetch(url);
+      if (!res.ok) return [];
+      const csv = await res.text();
+      const lines = csv.trim().split(/\r?\n/); if (lines.length<2) return [];
+      const header = lines[0].split(",");
+      const rows = lines.slice(1).map(line=>{
+        const cols=line.split(","); const obj={}; header.forEach((h,i)=>obj[h.trim()]=(cols[i]||"").trim()); return obj;
+      });
+      return rows.map(r=>{
+        const conf = r.confidence || r.confidence_text || "";
+        const when = r.acq_date && r.acq_time
+          ? new Date(`${r.acq_date}T${(r.acq_time+"").padStart(4,"0").slice(0,2)}:${(r.acq_time+"").padStart(4,"0").slice(2)}:00Z`).toISOString()
+          : isoNowMinus(0);
+        return {
+          title: `Thermal Anomaly (VIIRS) — ${r.bright_ti4 ? `BTi4 ${r.bright_ti4}` : "Possible Fire"}`,
+          summary: `Lat ${r.latitude}, Lon ${r.longitude} • Confidence ${conf || "n/a"}`,
+          event: "Fire/Heat Anomaly",
+          severity: (String(conf).toLowerCase().includes("high") ? "Severe" : "Moderate"),
+          urgency: "Immediate",
+          area: `~ ${(+r.latitude).toFixed(4)}, ${(+r.longitude).toFixed(4)}`,
+          effective: when,
+          expires: "",
+          source: "NASA FIRMS",
+          url: "https://firms.modaps.eosdis.nasa.gov/"
+        };
+      });
+    }
+
+    // FIRMS Global (split world into 4 quads) — only if key is present
+    async function fetchFIRMSGlobal(days=3){
+      if (!CONFIG.FIRMS_API_KEY) return [];
+      const quads = [
+        {minLon:-180,minLat:-90,maxLon:0,maxLat:0},
+        {minLon:0,minLat:-90,maxLon:180,maxLat:0},
+        {minLon:-180,minLat:0,maxLon:0,maxLat:90},
+        {minLon:0,minLat:0,maxLon:180,maxLat:90}
+      ];
+      const results = await Promise.allSettled(quads.map(q=>fetchFIRMS(q, days)));
+      let items = results.flatMap(r=>r.status==='fulfilled'?r.value:[]);
+      const seen=new Set();
+      items = items.filter(a=>{
+        const k = `${a.area}|${a.effective}`;
+        if (seen.has(k)) return false;
+        seen.add(k); return true;
+      });
+      return items.slice(0,60);
+    }
+
+    // NASA EONET Wildfires (fallback if no FIRMS key)
+    async function fetchEONETWildfires(){
+      const url = `https://eonet.gsfc.nasa.gov/api/v3/events?status=open&category=wildfires&limit=50`;
+      const res = await fetch(url);
+      if (!res.ok) return [];
+      const data = await res.json();
+      const events = data?.events || [];
+      return events.map(ev=>{
+        const geom = ev.geometry?.[ev.geometry.length-1];
+        const when = geom?.date || isoNowMinus(0);
+        const coords = geom?.coordinates;
+        let latlon = "Global";
+        if (Array.isArray(coords)) {
+          // EONET uses [lon, lat]
+          const lon = Array.isArray(coords[0]) ? coords[0][0] : coords[0];
+          const lat = Array.isArray(coords[0]) ? coords[0][1] : coords[1];
+          latlon = `${(+lat).toFixed(4)}, ${(+lon).toFixed(4)}`;
+        }
+        return {
+          title: ev.title || "Wildfire",
+          summary: `Reported by EONET • ${latlon}`,
+          event: "Wildfire",
+          severity: "Moderate",
+          urgency: "Immediate",
+          area: latlon,
+          effective: when,
+          expires: "",
+          source: "NASA EONET",
+          url: (ev.links && ev.links[0] && ev.links[0].href) || "https://eonet.gsfc.nasa.gov/"
+        };
+      });
+    }
+
+    // USGS NWIS (river gauges)
+    async function fetchNWIS(sites){
+      const url = `https://waterservices.usgs.gov/nwis/iv/?format=json&sites=${sites.join(",")}&parameterCd=00065,00060`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const ts = data?.value?.timeSeries || [];
+      const out=[];
+      ts.forEach(series=>{
+        const siteName = series?.sourceInfo?.siteName || "USGS Site";
+        const parm = series?.variable?.variableName || "Value";
+        const points = series?.values?.[0]?.value || [];
+        if (!points.length) return;
+        const last = points[points.length-1];
+        out.push({
+          title: `River ${parm} — ${siteName}`,
+          summary: `Latest reading: ${last.value}.`,
+          event: "River Level",
+          severity: "Moderate",
+          urgency: "Expected",
+          area: siteName,
+          effective: last.dateTime || isoNowMinus(0),
+          expires: "",
+          source: "USGS (NWIS)",
+          url: "https://waterdata.usgs.gov/monitoring-location/" + (series?.sourceInfo?.siteCode?.[0]?.value || "")
+        });
+      });
+      return out;
+    }
+
+    // WMATA (optional key)
+    async function fetchWMATAIncidents(){
+      if (!CONFIG.WMATA_API_KEY) return [];
+      const url = "https://api.wmata.com/Incidents.svc/json/Incidents";
+      const res = await fetch(url, { headers: { "api_key": CONFIG.WMATA_API_KEY } });
+      const data = await res.json();
+      const list = data?.Incidents || [];
+      return list.map(i=>({
+        title: `Transit Incident — ${i.IncidentType || "WMATA"}`,
+        summary: i.Description || "",
+        event: "Transit",
+        severity: "Moderate",
+        urgency: "Immediate",
+        area: i.LinesAffected || "WMATA Metro",
+        effective: isoNowMinus(0),
+        expires: "",
+        source: "WMATA",
+        url: "https://wmata.com/service/status/"
+      }));
+    }
+
+    // --------------- DASHBOARD ---------------
+    class EmergencyAlertDashboard{
+      constructor(){
+        this.alertsContainer = document.getElementById('alerts-container');
+        this.lastUpdatedElement = document.getElementById('last-updated');
+        this.sourceList = document.getElementById('source-list');
+        this.refreshInterval = CONFIG.refreshMs;
+        this.init();
       }
-    }
-
-    function renderDetailModal(alert){
-      const criticality = alert.latest_classification?.criticality || 'Unknown';
-      const rationale = alert.latest_classification?.rationale || 'No classification available';
-      const isAcknowledged = alert.user_actions?.some(a => a.action === 'acknowledged');
-      
-      const modalHTML = `
-        <div class="modal-header">
-          <span class="close-modal" onclick="closeDetailModal()">&times;</span>
-          <div class="modal-title">${htmlEscape(alert.title)}</div>
-          <div class="urgency-badge ${criticality}">${criticality}</div>
-          ${isAcknowledged ? '<span class="acknowledged-badge">✓ Acknowledged</span>' : ''}
-        </div>
-        <div class="modal-body">
-          <div class="detail-section">
-            <h3>Overview</h3>
-            <p>${htmlEscape(alert.summary || 'No summary available')}</p>
-          </div>
-          
-          <div class="detail-section">
-            <h3>Details</h3>
-            <div class="detail-grid">
-              <div class="detail-item"><label>Source</label><value>${htmlEscape(alert.source)}</value></div>
-              <div class="detail-item"><label>Event Type</label><value>${htmlEscape(alert.event_type || 'N/A')}</value></div>
-              <div class="detail-item"><label>Severity</label><value>${htmlEscape(alert.severity || 'N/A')}</value></div>
-              <div class="detail-item"><label>Urgency</label><value>${htmlEscape(alert.urgency || 'N/A')}</value></div>
-              <div class="detail-item"><label>Area</label><value>${htmlEscape(alert.area || 'N/A')}</value></div>
-              <div class="detail-item"><label>Effective</label><value>${new Date(alert.effective_at).toLocaleString()}</value></div>
-            </div>
-          </div>
-
-          <div class="detail-section">
-            <h3>AI Classification</h3>
-            <p><strong>Criticality:</strong> ${criticality}</p>
-            <p><strong>Rationale:</strong> ${htmlEscape(rationale)}</p>
-            <p style="opacity:0.7;font-size:0.85rem;">Model: ${htmlEscape(alert.latest_classification?.model_version || 'N/A')}</p>
-          </div>
-
-          ${alert.url ? `
-            <div class="detail-section">
-              <h3>Source Link</h3>
-              <p><a href="${alert.url}" target="_blank" style="color:#ffd76a;">${alert.url}</a></p>
-            </div>
-          ` : ''}
-
-          ${!isAcknowledged ? `
-            <div class="acknowledge-form">
-              <h3 style="margin-bottom:10px;color:#ffd76a;">Acknowledge Alert</h3>
-              <textarea id="ack-note" placeholder="Optional note (e.g., actions taken, assigned to...)"></textarea>
-              <button onclick="handleAcknowledge(${alert.id})">Acknowledge Alert</button>
-            </div>
-          ` : `
-            <div class="detail-section">
-              <h3>Acknowledgment</h3>
-              ${alert.user_actions.filter(a => a.action === 'acknowledged').map(a => `
-                <p>Acknowledged ${getTimeAgo(a.created_at)}</p>
-                ${a.note ? `<p style="font-style:italic;opacity:0.8;">"${htmlEscape(a.note)}"</p>` : ''}
-              `).join('')}
-            </div>
-          `}
-        </div>
-      `;
-      
-      document.getElementById('modal-body').innerHTML = modalHTML;
-      document.getElementById('detail-modal').classList.add('active');
-    }
-
-    async function handleAcknowledge(alertId){
-      const note = document.getElementById('ack-note')?.value;
-      try {
-        await acknowledgeAlert(alertId, note);
-        closeDetailModal();
-        loadAlerts();
-        alert('Alert acknowledged successfully');
-      } catch(e) {
-        console.error(e);
-        alert('Failed to acknowledge alert');
+      init(){
+        this.fetchAll();
+        setInterval(()=>this.fetchAll(), this.refreshInterval);
       }
-    }
+      async fetchAll(){
+        try{
+          this.alertsContainer.innerHTML = `<div class="loading">Loading emergency alerts...</div>`;
 
-    function closeDetailModal(){
-      document.getElementById('detail-modal').classList.remove('active');
-    }
+          const eqPromise = fetchUSGSEarthquakes(CONFIG.center.lat, CONFIG.center.lon, CONFIG.radiusKm);
+          const firePromise = TEST_MODE
+            ? (CONFIG.FIRMS_API_KEY ? fetchFIRMSGlobal(3) : fetchEONETWildfires())
+            : fetchFIRMS(CONFIG.bbox, 7);
 
-    // Close modal on outside click
-    window.onclick = function(event) {
-      const modal = document.getElementById('detail-modal');
-      if (event.target == modal) {
-        closeDetailModal();
+          const [nws, eq, fires, nwis, wmata] = await Promise.allSettled([
+            fetchNWSAlerts(CONFIG.center.lat, CONFIG.center.lon),
+            eqPromise,
+            firePromise,
+            fetchNWIS(CONFIG.nwisSites),
+            fetchWMATAIncidents()
+          ]);
+
+          const results = [
+            ...(nws.value || []),
+            ...(eq.value || []),
+            ...(fires.value || []),
+            ...(nwis.value || []),
+            ...(wmata.value || [])
+          ];
+
+          if (TEST_MODE && results.length===0){
+            results.push({
+              title:"Demo: System Check / No Live Alerts",
+              summary:"Test mode is enabled. Live sources returned no items right now, so this placeholder proves the UI is working.",
+              event:"System",
+              severity:"Moderate",
+              urgency:"Expected",
+              area:"Global",
+              effective: isoNowMinus(5*60*1000),
+              expires:"",
+              source:"Dashboard",
+              url:""
+            });
+          }
+
+          this.processAlerts(results);
+          this.updateProvenance(results);
+          this.updateLastUpdated();
+
+        }catch(e){
+          console.error("Fetch error:", e);
+          this.showError();
+        }
       }
-    }
+      processAlerts(alerts){
+        if (!alerts || alerts.length===0){ this.showNoAlerts(); return; }
+        const normalized = alerts.map(a => ({...a, urgency: mapUrgencyByWords(a.severity || a.urgency || a.event)}));
+        normalized.sort((a,b)=> new Date(b.effective||0)-new Date(a.effective||0));
+        this.renderAlerts(normalized);
+      }
+      renderAlerts(alerts){
+        this.alertsContainer.innerHTML = alerts.map(alert=>{
+          const urgency = this.mapUrgency(alert.severity, alert.urgency);
+          const timeAgo = getTimeAgo(new Date(alert.effective));
+          const location = alert.area || "Local";
+          const srcIcon = this.iconForSource(alert.source || "");
+          const link = alert.url ? `<a href="${alert.url}" target="_blank" rel="noopener">details</a>` : ``;
+          return `
+            <div class="alert-item ${urgency}">
+              <div class="alert-header">
+                <div>
+                  <div class="urgency-badge ${urgency}">${urgency}</div>
+                  <div class="time-location">${timeAgo} • ${htmlEscape(location)}</div>
+                </div>
+              </div>
+              <div class="alert-title">${htmlEscape(alert.title)}</div>
+              ${alert.summary ? `<div class="alert-summary">${htmlEscape(alert.summary)}</div>` : ``}
+              <div class="source-chip">${srcIcon} ${htmlEscape(alert.source || "Source")} ${link ? "• " + link : ""}</div>
+              <div class="relevance-section">
+                <div class="relevance-label">Relevant to you?</div>
+                <div class="relevance-buttons">
+                  <button class="relevance-btn thumbs-up" onclick="handleRelevance(this, true)">👍</button>
+                  <button class="relevance-btn thumbs-down" onclick="handleRelevance(this, false)">👎</button>
+                </div>
+              </div>
+            </div>`;
+        }).join("");
+      }
+      iconForSource(src){
+        const s = (src||"").toLowerCase();
+        if (s.includes("nws")) return `<i class="fas fa-bolt"></i>`;
+        if (s.includes("earthquakes") || s.includes("earthquake")) return `<i class="fas fa-mountain-sun"></i>`;
+        if (s.includes("nwis")) return `<i class="fas fa-water"></i>`;
+        if (s.includes("firms") || s.includes("eonet") || s.includes("nasa")) return `<i class="fas fa-satellite"></i>`;
+        if (s.includes("wmata")) return `<i class="fas fa-train-subway"></i>`;
+        if (s.includes("dashboard")) return `<i class="fas fa-circle-check"></i>`;
+        return `<i class="fas fa-circle-info"></i>`;
+      }
+      mapUrgency(severity, word){
+        const s = (severity || word || "").toLowerCase();
+        if (s.includes("extreme")||s.includes("severe")||s.includes("warning")||s.includes("immediate")) return "urgent";
+        if (s.includes("moderate")||s.includes("watch")||s.includes("advisory")||s.includes("expected")) return "moderate";
+        return "minor";
+      }
+      updateProvenance(alerts){
+        const sourcesLower = alerts.map(a => (a.source || "").toLowerCase());
+        const hasNWS   = sourcesLower.some(s => s.includes("nws"));
+        const hasEQ    = sourcesLower.some(s => s.includes("earthquake"));
+        const hasNWIS  = sourcesLower.some(s => s.includes("nwis"));
+        const hasFires = sourcesLower.some(s => s.includes("firms") || s.includes("eonet") || s.includes("nasa"));
+        const hasWMATA = sourcesLower.some(s => s.includes("wmata"));
 
-    // Render alerts
-    function renderAlerts(data){
-      const container = document.getElementById('alerts-container');
-      
-      if (!data.alerts || data.alerts.length === 0){
-        container.innerHTML = `
+        const items = [];
+        if (hasNWS)   items.push(`<li><i class="fas fa-bolt"></i> NWS Weather Alerts</li>`);
+        if (hasEQ)    items.push(`<li><i class="fas fa-mountain-sun"></i> USGS Earthquakes</li>`);
+        if (hasNWIS)  items.push(`<li><i class="fas fa-water"></i> USGS NWIS (Rivers)</li>`);
+        if (hasFires) items.push(`<li><i class="fas fa-satellite"></i> NASA FIRMS / EONET (Fires)</li>`);
+        if (hasWMATA) items.push(`<li><i class="fas fa-train-subway"></i> WMATA Incidents</li>`);
+        if (!items.length) items.push(`<li><i class="fas fa-circle-info"></i> No sources returned data</li>`);
+        this.sourceList.innerHTML = items.join("");
+      }
+      showNoAlerts(){
+        this.alertsContainer.innerHTML = `
           <div class="no-alerts">
             <h3>No Active Alerts</h3>
             <p>All systems are currently normal for the selected area.</p>
           </div>`;
-        return;
       }
-
-      // Sort alerts: relevant first, then irrelevant at bottom
-      const sortedAlerts = [...data.alerts].sort((a, b) => {
-        const aIsIrrelevant = a.user_actions?.some(action => action.action === 'irrelevant');
-        const bIsIrrelevant = b.user_actions?.some(action => action.action === 'irrelevant');
-        if (aIsIrrelevant && !bIsIrrelevant) return 1;
-        if (!aIsIrrelevant && bIsIrrelevant) return -1;
-        return new Date(b.effective_at) - new Date(a.effective_at);
-      });
-
-      // Apply source filters if any are checked
-      const checked = Array.from(document.querySelectorAll('#filter-options input[type="checkbox"]:checked')).map(cb => cb.value.toLowerCase());
-      const filtered = checked.length
-        ? sortedAlerts.filter(a => a.source && checked.includes(String(a.source).toLowerCase()))
-        : sortedAlerts;
-
-      container.innerHTML = filtered.map(alert => {
-        const isIrrelevant = alert.user_actions?.some(a => a.action === 'irrelevant');
-        const criticality = alert.latest_classification?.criticality || 'Low';
-        const timeAgo = getTimeAgo(alert.effective_at);
-        const location = alert.area || "Local";
-        const srcIcon = iconForSource(alert.source);
-        const link = alert.url ? `<a href="${alert.url}" target="_blank" rel="noopener">source</a>` : ``;
-        const isAcknowledged = alert.user_actions?.some(a => a.action === 'acknowledged');
-        
-        return `
-          <div class="alert-item ${criticality}" style="${isIrrelevant ? 'opacity: 0.5; order: 999;' : ''}">
-            <div class="alert-header">
-              <div>
-                <div class="urgency-badge ${criticality}">${criticality}</div>
-                ${isAcknowledged ? '<span class="acknowledged-badge">✓ Acknowledged</span>' : ''}
-                ${isIrrelevant ? '<span class="acknowledged-badge" style="background: rgba(220,53,69,0.3); color: #ff6b6b;">Marked Irrelevant</span>' : ''}
-                <div class="time-location">${timeAgo} • ${htmlEscape(location)}</div>
-              </div>
-            </div>
-            <div class="alert-title">${htmlEscape(alert.title)}</div>
-            ${alert.summary ? `<div class="alert-summary">${htmlEscape(alert.summary.substring(0, 200))}${alert.summary.length > 200 ? '...' : ''}</div>` : ``}
-            <div class="source-chip">${srcIcon} ${htmlEscape(alert.source)} ${link ? "• " + link : ""}</div>
-            <div class="action-section">
-              <div class="action-buttons">
-                <button class="action-btn view-more" onclick="showAlertDetail(${alert.id})">Know More</button>
-                ${!isIrrelevant ? `<button class="action-btn not-relevant" onclick="handleNotRelevant(${alert.id}, this)">Irrelevant</button>` : ''}
-              </div>
-            </div>
-          </div>`;
-      }).join("");
-    }
-
-    // Build filter options from active sources
-    function updateFilterOptions(alerts){
-      const filterContainer = document.getElementById('filter-options');
-      if (!alerts || alerts.length === 0){
-        filterContainer.innerHTML = '';
-        return;
-      }
-      const sources = Array.from(new Set(alerts.map(a => a.source).filter(Boolean))).sort();
-      filterContainer.innerHTML = sources.map(src => `
-        <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);padding:6px 10px;border-radius:6px;cursor:pointer;">
-          <input type="checkbox" value="${htmlEscape(src)}" style="accent-color:#ffd76a;" />
-          <span>${iconForSource(src)} ${htmlEscape(sourceDisplayName(src))}</span>
-        </label>
-      `).join('');
-
-      // Wire up listeners
-      document.querySelectorAll('#filter-options input[type="checkbox"]').forEach(cb => {
-        cb.addEventListener('change', () => {
-          // Re-render alerts using current cached data
-          if (window.__lastData) {
-            renderAlerts(window.__lastData);
-          }
-        });
-      });
-
-      // Clear filters button
-      const clearBtn = document.getElementById('clear-filters');
-      if (clearBtn){
-        clearBtn.onclick = () => {
-          document.querySelectorAll('#filter-options input[type="checkbox"]').forEach(cb => cb.checked = false);
-          if (window.__lastData) renderAlerts(window.__lastData);
-        };
-      }
-    }
-
-    // Update active sources list
-    function updateSourcesList(alerts){
-      const sourceList = document.getElementById('source-list');
-      if (!alerts || alerts.length === 0) {
-        sourceList.innerHTML = '<li style="opacity: 0.7;"><i class="fas fa-info-circle"></i> No active sources</li>';
-        document.getElementById('filter-options').innerHTML = '';
-        return;
-      }
-
-      // Get unique sources from alerts
-      const sources = new Set();
-      alerts.forEach(alert => {
-        if (alert.source) {
-          sources.add(alert.source);
-        }
-      });
-
-      if (sources.size === 0) {
-        sourceList.innerHTML = '<li style="opacity: 0.7;"><i class="fas fa-info-circle"></i> No active sources</li>';
-        document.getElementById('filter-options').innerHTML = '';
-        return;
-      }
-
-      // Sort sources alphabetically
-      const sortedSources = Array.from(sources).sort();
-      
-      sourceList.innerHTML = sortedSources.map(source => {
-        return `<li>${iconForSource(source)} ${htmlEscape(sourceDisplayName(source))}</li>`;
-      }).join('');
-
-      // Build filter options as well
-      updateFilterOptions(alerts);
-    }
-
-    // Main load function
-    async function loadAlerts(){
-      try {
-        const data = await fetchAlerts();
-        window.__lastData = data; // cache for filters
-        renderAlerts(data);
-        updateSourcesList(data.alerts);
-        document.getElementById('last-updated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
-      } catch(e) {
-        console.error('Error loading alerts:', e);
-        document.getElementById('alerts-container').innerHTML = `
+      showError(){
+        this.alertsContainer.innerHTML = `
           <div class="no-alerts">
             <h3>Connection Error</h3>
-            <p>Unable to fetch current alerts. Please ensure the API server is running.</p>
+            <p>Unable to fetch current alerts. Retrying automatically...</p>
           </div>`;
-        document.getElementById('source-list').innerHTML = '<li style="opacity: 0.7; color: #ff6b6b;"><i class="fas fa-exclamation-triangle"></i> Connection error</li>';
-        document.getElementById('filter-options').innerHTML = '';
+      }
+      updateLastUpdated(){
+        const now = new Date();
+        if (this.lastUpdatedElement) {
+          this.lastUpdatedElement.textContent = `Last updated: ${now.toLocaleTimeString()}`;
+        }
       }
     }
 
-              // Filter alerts by criticality (High, Medium, Low)
-          function filterByCriticality(level) {
-            const container = document.getElementById('alerts-container');
-
-            if (!window.__lastData || !window.__lastData.alerts) return;
-
-            // Filter logic
-            let filteredAlerts = window.__lastData.alerts;
-            if (level !== 'All') {
-              filteredAlerts = filteredAlerts.filter(a => 
-                a.latest_classification?.criticality === level
-              );
-            }
-
-        // Highlight active button
-        document.querySelectorAll('.urgency-level').forEach(el => {
-          el.style.outline = 'none';
-          if (el.textContent.trim() === level) {
-            el.style.outline = '2px solid #ffd76a';
-            el.style.outlineOffset = '2px';
-          }
-        });
-
-        // Render filtered alerts
-        renderAlerts({ alerts: filteredAlerts });
-      }
-
-
-    // Initialize
-    document.addEventListener('DOMContentLoaded', () => {
-      loadAlerts();
-      setInterval(loadAlerts, REFRESH_MS);
-    });
+    document.addEventListener('DOMContentLoaded', ()=>{ new EmergencyAlertDashboard(); });
   </script>
 </body>
 </html>
-
