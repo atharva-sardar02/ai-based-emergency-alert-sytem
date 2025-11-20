@@ -1,5 +1,5 @@
 """SQLAlchemy ORM models for the emergency alert system."""
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Index, UniqueConstraint, Float
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Index, UniqueConstraint, Float, Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.database import Base
@@ -88,5 +88,26 @@ class UserAction(Base):
     # Indexes
     __table_args__ = (
         Index('idx_user_actions_alert_action', 'alert_id', 'action'),
+    )
+
+
+class User(Base):
+    """User model for authentication."""
+    
+    __tablename__ = "users"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    username = Column(String(100), unique=True, nullable=False, index=True)
+    hashed_password = Column(String(255), nullable=False)
+    full_name = Column(String(255), nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    last_login = Column(DateTime(timezone=True), nullable=True)
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_users_email', 'email'),
+        Index('idx_users_username', 'username'),
     )
 

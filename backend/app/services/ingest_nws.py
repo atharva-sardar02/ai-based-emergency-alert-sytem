@@ -51,9 +51,15 @@ class IngestNWS(BaseIngestionService):
     
     def extract_items(self, raw_data: Any) -> List[Any]:
         """Extract features from NWS GeoJSON response."""
-        if not raw_data or 'features' not in raw_data:
+        if not raw_data:
+            logger.warning("NWS raw_data is None or empty")
             return []
-        return raw_data['features']
+        if 'features' not in raw_data:
+            logger.warning(f"NWS response missing 'features' key. Keys: {list(raw_data.keys()) if isinstance(raw_data, dict) else 'not a dict'}")
+            return []
+        features = raw_data['features']
+        logger.info(f"NWS extracted {len(features)} features from API response")
+        return features
     
     async def _prepare_zone_cache(self, items: List[Any]) -> Dict[str, tuple]:
         """Prepare zone coordinates cache for all items."""

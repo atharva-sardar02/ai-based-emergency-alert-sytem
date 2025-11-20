@@ -28,8 +28,10 @@ async def run_nws_ingestion():
         service = IngestNWS(db)
         count = await service.run()
         logger.info(f"NWS ingestion completed: {count} new alerts")
+        return count
     except Exception as e:
         logger.error(f"NWS ingestion failed: {e}", exc_info=True)
+        raise
     finally:
         db.close()
 
@@ -41,8 +43,10 @@ async def run_usgs_eq_ingestion():
         service = IngestUSGSEarthquakes(db)
         count = await service.run()
         logger.info(f"USGS Earthquake ingestion completed: {count} new alerts")
+        return count
     except Exception as e:
         logger.error(f"USGS Earthquake ingestion failed: {e}", exc_info=True)
+        raise
     finally:
         db.close()
 
@@ -54,8 +58,10 @@ async def run_nwis_ingestion():
         service = IngestNWIS(db)
         count = await service.run()
         logger.info(f"NWIS ingestion completed: {count} new alerts")
+        return count
     except Exception as e:
         logger.error(f"NWIS ingestion failed: {e}", exc_info=True)
+        raise
     finally:
         db.close()
 
@@ -67,8 +73,10 @@ async def run_fires_ingestion():
         service = IngestFires(db)
         count = await service.run()
         logger.info(f"FIRMS fire detection ingestion completed: {count} new alerts")
+        return count
     except Exception as e:
         logger.error(f"FIRMS ingestion failed: {e}", exc_info=True)
+        raise
     finally:
         db.close()
 
@@ -80,16 +88,21 @@ async def run_wmata_ingestion():
         service = IngestWMATA(db)
         count = await service.run()
         logger.info(f"WMATA ingestion completed: {count} new alerts")
+        return count
     except Exception as e:
         logger.error(f"WMATA ingestion failed: {e}", exc_info=True)
+        raise
     finally:
         db.close()
 
 
 async def run_all_ingestions():
     """Run all ingestion jobs in parallel."""
+    logger.info("=" * 60)
     logger.info("Starting all ingestion jobs...")
-    await asyncio.gather(
+    logger.info(f"Timestamp: {datetime.now()}")
+    
+    results = await asyncio.gather(
         run_nws_ingestion(),
         run_usgs_eq_ingestion(),
         run_nwis_ingestion(),
@@ -97,7 +110,20 @@ async def run_all_ingestions():
         run_wmata_ingestion(),
         return_exceptions=True
     )
-    logger.info("All ingestion jobs completed")
+    
+    # Log results
+    total_new = 0
+    for i, result in enumerate(results):
+        source_names = ["NWS", "USGS_EQ", "NWIS", "FIRMS", "WMATA"]
+        if isinstance(result, Exception):
+            logger.error(f"{source_names[i]} ingestion raised exception: {result}", exc_info=result)
+        else:
+            logger.info(f"{source_names[i]} ingestion: {result} new alerts")
+            if isinstance(result, int):
+                total_new += result
+    
+    logger.info(f"All ingestion jobs completed. Total new alerts: {total_new}")
+    logger.info("=" * 60)
 
 
 def start_scheduler():

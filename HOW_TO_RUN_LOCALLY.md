@@ -18,41 +18,69 @@ alembic upgrade head
 
 ## Start everything (every run)
 
-Open three terminals and run these scripts from the project root:
+**Unified Mode (Recommended)**: One command starts everything!
 
 ```powershell
-# Terminal A - API server
+# From project root - starts API, Ingestion, Classification, AND Frontend
 ./start-backend.ps1
 ```
+
+That's it! The unified backend automatically:
+- Starts the API server on port 8000
+- Starts the ingestion scheduler (fetches all sources every 5 minutes)
+- Starts the classification worker (processes alerts continuously)
+- **Serves the frontend automatically at http://localhost:8000**
+
+**No separate frontend server needed!** The frontend is served directly by FastAPI.
+
+### Frontend Options
+
+**Option 1: Automatic (Recommended)**
+- Frontend is automatically served when you run `./start-backend.ps1`
+- Access at: http://localhost:8000
+- No additional steps needed
+
+**Option 2: Separate Frontend Server (Optional)**
+If you prefer to run the frontend separately (e.g., for development/debugging):
+
 ```powershell
-# Terminal B - Ingestion scheduler (ALL SOURCES, continuous)
-./start-ingestion.ps1
-```
-```powershell
-# Terminal C - Classification worker (AI with rules fallback)
-./start-classifier.ps1
-```
-```powershell
-# Terminal D - Frontend (serves dashboard at http://localhost:3000)
-cd frontend; python -m http.server 3000
+# In a separate terminal
+cd frontend
+python -m http.server 3000
 ```
 
-That’s it. The dashboard will automatically keep updating with alerts from:
+Then access at: http://localhost:3000
+
+**Alternative**: If you prefer separate processes for debugging, you can still run:
+- `./start-backend.ps1` - API + Ingestion + Classification (frontend included)
+- `./start-ingestion.ps1` - Ingestion scheduler only
+- `./start-classifier.ps1` - Classification worker only
+
+The dashboard will automatically keep updating with alerts from:
 - NWS Weather, USGS Earthquakes, USGS NWIS (no keys required)
-- NASA FIRMS (fires) and WMATA (transit) if keys are present in `backend/.env`
+- NASA FIRMS (fires) and WMATA (transit) if keys are present in root `.env`
 
 ## Where to open
 
-- Dashboard: http://localhost:3000
-- API docs: http://localhost:8000/docs
-- Health: http://localhost:8000/api/health
+**With Unified Mode (Recommended)**:
+- **Dashboard**: http://localhost:8000 (automatically served by FastAPI)
+- **Map View**: http://localhost:8000/map.html
+- **API docs**: http://localhost:8000/docs
+- **Health check**: http://localhost:8000/api/health
+
+**With Separate Frontend Server**:
+- **Dashboard**: http://localhost:3000
+- **Map View**: http://localhost:3000/map.html
+- **API docs**: http://localhost:8000/docs (still on backend port)
 
 ## Notes
 
-- Ensure `backend/.env` exists. Keys are optional:
+- Ensure root `.env` file exists (one level up from `backend/`). Keys are optional:
+  - `OPENAI_API_KEY=` (optional, for OpenAI classification)
   - `FIRMS_API_KEY=` (optional)
   - `WMATA_API_KEY=` (optional)
 - Set `TEST_MODE=true` for Virginia-wide demo coverage.
+- The unified backend runs all services in a single process for simplicity.
 
 ## Stop everything
 Press Ctrl+C in each terminal. To stop Postgres:

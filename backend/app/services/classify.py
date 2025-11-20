@@ -67,7 +67,75 @@ def classify_by_rules(alert: Alert) -> Dict[str, str]:
     }
 
 
-async def classify_with_llm(alert: Alert) -> Optional[Dict[str, str]]:
+async def classify_with_openai(alert: Alert) -> Optional[Dict[str, str]]:
+    """
+    Classify alert using OpenAI API.
+    Returns None if OpenAI is unavailable or API key is missing.
+    """
+    # Check if API key is available
+    if not settings.OPENAI_API_KEY:
+        return None
+    
+    try:
+        try:
+            from openai import OpenAI  # type: ignore
+        except Exception as e:
+            logger.warning("OpenAI library not available - skipping OpenAI classification")
+            return None
+
+        client = OpenAI(
+            api_key=settings.OPENAI_API_KEY,
+            base_url=settings.OPENAI_BASE_URL
+        )
+
+        # Build prompt (same format as Ollama)
+        prompt = f"""You are an emergency management AI assistant. Classify this alert's criticality as High, Medium, or Low.
+
+Alert Details:
+- Source: {alert.source}
+- Event Type: {alert.event_type or 'N/A'}
+- Severity: {alert.severity or 'N/A'}
+- Urgency: {alert.urgency or 'N/A'}
+- Title: {alert.title}
+- Summary: {alert.summary[:200] if alert.summary else 'N/A'}
+- Area: {alert.area or 'N/A'}
+
+Respond with a JSON object in this exact format:
+{{"criticality": "High|Medium|Low", "rationale": "Brief 1-sentence explanation"}}"""
+
+        # Call OpenAI API
+        response = client.chat.completions.create(
+            model=settings.OPENAI_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+            response_format={"type": "json_object"}  # Request JSON response
+        )
+        
+        # Parse response
+        content = response.choices[0].message.content.strip()
+        if not content:
+            raise ValueError("Empty response from OpenAI API")
+        
+        # Parse JSON
+        result = json.loads(content)
+        
+        # Validate
+        if result.get("criticality") not in ["High", "Medium", "Low"]:
+            raise ValueError(f"Invalid criticality: {result.get('criticality')}")
+        
+        logger.info(f"OpenAI classified alert {alert.id} as {result['criticality']}")
+        return result
+        
+    except Exception as e:
+        logger.warning(
+            "OpenAI classification failed (model=%s): %s - falling back to Ollama",
+            settings.OPENAI_MODEL,
+            e,
+        )
+        return None
+
+
+async def classify_with_ollama(alert: Alert) -> Optional[Dict[str, str]]:
     """
     Classify alert using local LLM via Ollama.
     Returns None if LLM is unavailable.
@@ -136,13 +204,24 @@ Respond ONLY with valid JSON in this format:
 
 async def classify_alert(alert: Alert, db: Session) -> Classification:
     """
-    Classify a single alert using LLM or rules fallback.
+    Classify a single alert using three-tier fallback: OpenAI → Ollama → Rules.
     """
-    # Try LLM first
-    result = await classify_with_llm(alert)
-    model_version = settings.MODEL_NAME if result else "rules-fallback"
+    result = None
+    model_version = "rules-fallback"
     
-    # Fallback to rules if LLM fails
+    # Tier 1: Try OpenAI first (if API key available)
+    if settings.OPENAI_API_KEY:
+        result = await classify_with_openai(alert)
+        if result:
+            model_version = f"openai-{settings.OPENAI_MODEL}"
+    
+    # Tier 2: Try Ollama if OpenAI failed or unavailable
+    if not result:
+        result = await classify_with_ollama(alert)
+        if result:
+            model_version = settings.MODEL_NAME
+    
+    # Tier 3: Fallback to rules if both LLMs failed
     if not result:
         result = classify_by_rules(alert)
         model_version = "rules-fallback"
@@ -202,7 +281,12 @@ async def classification_worker():
     logger.info("=" * 60)
     logger.info("Alexandria EAS - Classification Worker")
     logger.info("=" * 60)
-    logger.info(f"Model: {settings.MODEL_NAME}")
+    if settings.OPENAI_API_KEY:
+        logger.info(f"Primary: OpenAI ({settings.OPENAI_MODEL})")
+        logger.info(f"Fallback 1: Ollama ({settings.MODEL_NAME})")
+    else:
+        logger.info(f"Primary: Ollama ({settings.MODEL_NAME})")
+    logger.info("Fallback 2: Rule-based classification")
     
     while True:
         try:

@@ -41,18 +41,33 @@ async def list_alerts(
             # Subquery to find alert IDs with 'irrelevant' action
             irrelevant_alert_ids = db.query(models.UserAction.alert_id).filter(
                 models.UserAction.action == "irrelevant"
-            ).subquery()
+            ).distinct().all()
             
-            query = query.filter(~models.Alert.id.in_(irrelevant_alert_ids))
+            # Only filter if there are irrelevant alerts
+            if irrelevant_alert_ids:
+                irrelevant_ids = [aid[0] for aid in irrelevant_alert_ids]
+                query = query.filter(~models.Alert.id.in_(irrelevant_ids))
         
         # Filter by criticality if specified
         if criticality:
             # Get alert IDs with matching criticality
             alert_ids_with_criticality = db.query(models.Classification.alert_id).filter(
                 models.Classification.criticality == criticality
-            ).distinct().subquery()
+            ).distinct().all()
             
-            query = query.filter(models.Alert.id.in_(alert_ids_with_criticality))
+            # Only filter if there are alerts with this criticality
+            if alert_ids_with_criticality:
+                criticality_ids = [aid[0] for aid in alert_ids_with_criticality]
+                query = query.filter(models.Alert.id.in_(criticality_ids))
+            else:
+                # No alerts with this criticality, return empty result
+                return schemas.AlertListResponse(
+                    alerts=[],
+                    total=0,
+                    page=page,
+                    limit=limit,
+                    has_more=False
+                )
         
         # Get total count
         total = query.count()
@@ -124,7 +139,10 @@ async def list_alerts(
         
     except Exception as e:
         logger.error(f"Error listing alerts: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to retrieve alerts")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Failed to retrieve alerts: {str(e)}"
+        )
 
 
 @router.get("/alerts/{alert_id}", response_model=schemas.AlertDetailResponse)

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up - Alexandria Emergency Alert System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:#001f3f;color:#fff;font-family:Arial, sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    .signup-container{background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border-radius:12px;padding:40px;max-width:450px;width:100%;box-shadow:0 10px 25px rgba(0,0,0,.3)}
+    .signup-container h1{font-size:2rem;margin-bottom:10px;font-weight:700;text-align:center}
+    .signup-container p{text-align:center;opacity:.8;margin-bottom:30px;font-size:.9rem}
+    .form-group{margin-bottom:20px}
+    .form-group label{display:block;margin-bottom:8px;font-size:.9rem;opacity:.9}
+    .form-group input{width:100%;padding:12px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-size:1rem}
+    .form-group input:focus{outline:none;border-color:#4dabf7;box-shadow:0 0 0 3px rgba(77,171,247,.1)}
+    .form-group input::placeholder{color:rgba(255,255,255,.5)}
+    .form-group small{display:block;margin-top:5px;font-size:.8rem;opacity:.7}
+    .btn{width:100%;padding:12px;border-radius:6px;border:none;background:#28a745;color:#fff;font-size:1rem;font-weight:600;cursor:pointer;transition:all .2s}
+    .btn:hover{background:#218838;transform:translateY(-1px)}
+    .btn:active{transform:translateY(0)}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .error-message{background:rgba(220,53,69,.2);border:1px solid #dc3545;color:#ff6b6b;padding:12px;border-radius:6px;margin-bottom:20px;display:none;font-size:.9rem}
+    .error-message.show{display:block}
+    .success-message{background:rgba(40,167,69,.2);border:1px solid #28a745;color:#51cf66;padding:12px;border-radius:6px;margin-bottom:20px;display:none;font-size:.9rem}
+    .success-message.show{display:block}
+    .login-link{text-align:center;margin-top:20px;font-size:.9rem;opacity:.8}
+    .login-link a{color:#4dabf7;text-decoration:none}
+    .login-link a:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+  <div class="signup-container">
+    <h1><i class="fas fa-user-plus"></i> Sign Up</h1>
+    <p>Create your account</p>
+    
+    <div id="error-message" class="error-message"></div>
+    <div id="success-message" class="success-message"></div>
+    
+    <form id="signup-form">
+      <div class="form-group">
+        <label for="email"><i class="fas fa-envelope"></i> Email</label>
+        <input type="email" id="email" name="email" placeholder="your.email@example.com" required autocomplete="email">
+      </div>
+      
+      <div class="form-group">
+        <label for="username"><i class="fas fa-user"></i> Username</label>
+        <input type="text" id="username" name="username" placeholder="Choose a username" required autocomplete="username" minlength="3" maxlength="100">
+        <small>3-100 characters</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="password"><i class="fas fa-lock"></i> Password</label>
+        <input type="password" id="password" name="password" placeholder="Enter password" required autocomplete="new-password" minlength="6">
+        <small>Minimum 6 characters</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="confirm-password"><i class="fas fa-lock"></i> Confirm Password</label>
+        <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm password" required autocomplete="new-password">
+      </div>
+      
+      <div class="form-group">
+        <label for="full-name"><i class="fas fa-id-card"></i> Full Name (Optional)</label>
+        <input type="text" id="full-name" name="full-name" placeholder="Your full name" autocomplete="name">
+      </div>
+      
+      <button type="submit" class="btn" id="submit-btn">
+        <i class="fas fa-user-plus"></i> Create Account
+      </button>
+    </form>
+    
+    <div class="login-link">
+      Already have an account? <a href="login.html">Login</a>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:8000/api/auth';
+    
+    // Check if already logged in
+    if (localStorage.getItem('auth_token')) {
+      window.location.href = 'index.html';
+    }
+    
+    const form = document.getElementById('signup-form');
+    const errorMessage = document.getElementById('error-message');
+    const successMessage = document.getElementById('success-message');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.classList.add('show');
+      successMessage.classList.remove('show');
+      setTimeout(() => errorMessage.classList.remove('show'), 5000);
+    }
+    
+    function showSuccess(message) {
+      successMessage.textContent = message;
+      successMessage.classList.add('show');
+      errorMessage.classList.remove('show');
+    }
+    
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      const fullName = document.getElementById('full-name').value.trim();
+      
+      // Validation
+      if (!email || !username || !password || !confirmPassword) {
+        showError('Please fill in all required fields');
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        showError('Passwords do not match');
+        return;
+      }
+      
+      if (password.length < 6) {
+        showError('Password must be at least 6 characters');
+        return;
+      }
+      
+      // Check password byte length (bcrypt limit is 72 bytes)
+      const passwordBytes = new TextEncoder().encode(password);
+      if (passwordBytes.length > 72) {
+        showError('Password cannot be longer than 72 characters');
+        return;
+      }
+      
+      if (username.length < 3) {
+        showError('Username must be at least 3 characters');
+        return;
+      }
+      
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating Account...';
+      
+      try {
+        const response = await fetch(`${API_BASE}/signup`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email,
+            username,
+            password,
+            full_name: fullName || null
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          showError(data.detail || 'Sign up failed. Please try again.');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+          return;
+        }
+        
+        // Store token and user info
+        localStorage.setItem('auth_token', data.access_token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        showSuccess('Account created successfully! Redirecting...');
+        
+        // Redirect to dashboard after short delay
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1000);
+      } catch (error) {
+        showError('Network error. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+        console.error('Signup error:', error);
+      }
+    });
+  </script>
+</body>
+</html>
+
